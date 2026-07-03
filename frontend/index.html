@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IFT Dataset Builder</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: ui-monospace, "Cascadia Code", "Menlo", monospace;
+    background: #0f0f0f;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+  .card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 10px;
+    padding: 28px 32px;
+    width: 100%;
+    max-width: 680px;
+  }
+  h1 { font-size: 14px; font-weight: 600; color: #fff; letter-spacing: 0.05em; margin-bottom: 24px; }
+  label { display: block; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; margin-top: 18px; }
+  input[type="file"] {
+    width: 100%; padding: 10px 12px; background: #111; border: 1px solid #2a2a2a;
+    border-radius: 6px; color: #e0e0e0; font-family: inherit; font-size: 13px; cursor: pointer;
+  }
+  select {
+    width: 100%; padding: 10px 12px; background: #111; border: 1px solid #2a2a2a;
+    border-radius: 6px; color: #e0e0e0; font-family: inherit; font-size: 13px; cursor: pointer;
+    appearance: none;
+  }
+  .btn {
+    display: block; width: 100%; margin-top: 20px; padding: 11px;
+    background: #fff; color: #000; border: none; border-radius: 6px;
+    font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn:hover:not(:disabled) { background: #e0e0e0; }
+  .btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+  .btn-secondary { background: #1e3a2e; color: #4ade80; margin-top: 10px; }
+  .btn-secondary:hover:not(:disabled) { background: #1a4a36; }
+  .progress-wrap { margin-top: 20px; background: #111; border-radius: 4px; height: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; background: #4ade80; transition: width 0.4s ease; }
+  .status-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 8px; font-size: 11px; color: #666;
+  }
+  .badge {
+    padding: 2px 8px; border-radius: 20px; font-size: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  .badge-idle     { background: #222; color: #888; }
+  .badge-running  { background: #1e3a2e; color: #4ade80; }
+  .badge-done     { background: #1a3a4a; color: #38bdf8; }
+  .badge-failed   { background: #3a1a1a; color: #f87171; }
+  .log {
+    margin-top: 20px; background: #0a0a0a; border: 1px solid #1e1e1e;
+    border-radius: 6px; padding: 12px 14px; height: 220px;
+    overflow-y: auto; font-size: 11px; line-height: 1.7; color: #4ade80;
+  }
+  .log .ts   { color: #555; user-select: none; }
+  .log .err  { color: #f87171; }
+  .log .info { color: #888; }
+  .divider { border: none; border-top: 1px solid #2a2a2a; margin: 24px 0; }
+  .stat-row { display: flex; gap: 12px; margin-top: 12px; }
+  .stat { flex: 1; background: #111; border: 1px solid #2a2a2a; border-radius: 6px; padding: 10px 14px; }
+  .stat-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; }
+  .stat-value { font-size: 20px; font-weight: 600; color: #e0e0e0; margin-top: 2px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>⬡ IFT DATASET BUILDER</h1>
+
+  <label>PDF Document</label>
+  <input type="file" id="pdf-input" accept=".pdf">
+
+  <label>Document Type</label>
+  <select id="doc-type">
+    <option value="hr">HR Handbook</option>
+    <option value="finance">Finance Handbook</option>
+  </select>
+
+  <button class="btn" id="start-btn">Start Generation</button>
+  <button class="btn btn-secondary" id="dl-btn" disabled>Download Alpaca JSON</button>
+
+  <hr class="divider">
+
+  <div class="stat-row">
+    <div class="stat">
+      <div class="stat-label">Status</div>
+      <div class="stat-value" id="stat-status">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Chunks</div>
+      <div class="stat-value" id="stat-chunks">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Progress</div>
+      <div class="stat-value" id="stat-pct">—</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Failed</div>
+      <div class="stat-value" id="stat-failed">—</div>
+    </div>
+  </div>
+
+  <div class="progress-wrap" style="margin-top: 14px;">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <div class="log" id="log"></div>
+</div>
+
+<script>
+  let jobId = null;
+  let es    = null;
+
+  const $ = id => document.getElementById(id);
+
+  function log(msg, cls = '') {
+    const el  = $('log');
+    const ts  = new Date().toLocaleTimeString('en-GB', { hour12: false });
+    const div = document.createElement('div');
+    div.innerHTML = `<span class="ts">${ts}</span>  <span class="${cls}">${msg}</span>`;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function setStats(d) {
+    $('stat-status').textContent  = d.status ?? '—';
+    $('stat-chunks').textContent  = d.total  != null ? `${d.completed}/${d.total}` : '—';
+    $('stat-pct').textContent     = d.pct    != null ? `${d.pct}%` : '—';
+    $('stat-failed').textContent  = d.failed ?? '—';
+    $('progress-fill').style.width = (d.pct ?? 0) + '%';
+  }
+
+  $('start-btn').addEventListener('click', async () => {
+    const file    = $('pdf-input').files[0];
+    const docType = $('doc-type').value;
+    if (!file) { log('Please select a PDF file.', 'err'); return; }
+
+    $('start-btn').disabled = true;
+    $('dl-btn').disabled    = true;
+    log(`Uploading ${file.name}…`);
+
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('document_type', docType);
+
+    try {
+      const res  = await fetch('/jobs/', { method: 'POST', body: fd });
+      const data = await res.json();
+
+      if (!res.ok) {
+        log('Upload error: ' + JSON.stringify(data), 'err');
+        $('start-btn').disabled = false;
+        return;
+      }
+
+      jobId = data.job_id;
+      log(`Job created (id=${jobId}, chunks=${data.total_chunks})`);
+      setStats({ status: 'pending', completed: 0, total: data.total_chunks, failed: 0, pct: 0 });
+      startSSE(jobId);
+
+    } catch (err) {
+      log('Network error: ' + err.message, 'err');
+      $('start-btn').disabled = false;
+    }
+  });
+
+  function startSSE(id) {
+    if (es) es.close();
+    es = new EventSource(`/jobs/${id}/stream`);
+
+    es.onmessage = e => {
+      const d = JSON.parse(e.data);
+
+      if (d.error) {
+        log('SSE error: ' + d.error, 'err');
+        es.close();
+        return;
+      }
+
+      setStats(d);
+
+      if (d.status === 'done') {
+        es.close();
+        log(`Generation complete — ${d.completed} chunks processed.`);
+        $('dl-btn').disabled    = false;
+        $('start-btn').disabled = false;
+      }
+      if (d.status === 'failed') {
+        es.close();
+        log(`Job failed after ${d.completed} chunks (${d.failed} errors). Check server logs.`, 'err');
+        $('start-btn').disabled = false;
+      }
+    };
+
+    es.onerror = () => {
+      log('SSE connection dropped — job is still running server-side. Reconnecting…', 'info');
+    };
+  }
+
+  $('dl-btn').addEventListener('click', () => {
+    if (jobId) window.open(`/jobs/${jobId}/export?format=alpaca`);
+  });
+</script>
+</body>
+</html>

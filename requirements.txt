@@ -1,0 +1,11 @@
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+sqlmodel==0.0.18
+pymupdf==1.24.3
+tiktoken==0.7.0
+nltk==3.8.1
+sentence-transformers==3.0.0
+rapidfuzz==3.9.0
+python-dotenv==1.0.1
+pydantic-settings==2.2.1
+httpx==0.27.0
