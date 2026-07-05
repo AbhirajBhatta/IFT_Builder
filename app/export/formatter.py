@@ -14,14 +14,15 @@ Supported output formats:
     {"conversations": [{"from": "human", "value": "..."}, {"from": "gpt", "value": "..."}]}
     Used by: FastChat, some Axolotl configs.
 
-CRITICAL:
-The citation header is embedded INSIDE the model output so the fine-tuned
-model learns to produce citations during inference.
+CRITICAL: The citation header [Chapter: ... | Pages: ...] is INSIDE the
+"output" / "gpt" field — not sidecar metadata. This is intentional: the
+fine-tuned model must learn to emit citations as part of its answer at
+inference time. Metadata-only storage would make citations invisible to the
+model during training.
 
 Quick test:
     python -m app.export.formatter <job_id>
 """
-
 from __future__ import annotations
 
 import json
@@ -37,178 +38,83 @@ from app.models import QAPair
 settings = get_settings()
 
 
-# ──────────────────────────────────────────────────────────────
-# Citation Helper
-# ──────────────────────────────────────────────────────────────
-
-def _citation(pair: QAPair) -> str:
-    """
-    Build a citation header from the QAPair metadata.
-    """
-
-    citation = (
-        f"[Chapter: {pair.chapter}"
-        f" | Pages: {pair.start_page}-{pair.end_page}]"
-    )
-
-    if pair.section_title:
-        citation += f" [Section: {pair.section_title}]"
-
-    return citation
-
-
-# ──────────────────────────────────────────────────────────────
-# Format converters
-# ──────────────────────────────────────────────────────────────
+# ── Format converters ─────────────────────────────────────────────────────────
 
 def _to_alpaca(pair: QAPair) -> dict:
     return {
         "instruction": pair.question,
-        "input": "",
-        "output": f"{_citation(pair)}\n\n{pair.answer}",
+        "input":       "",
+        "output":      pair.answer,   # citation header + verbatim quote
     }
 
 
 def _to_sharegpt(pair: QAPair) -> dict:
     return {
         "conversations": [
-            {
-                "from": "human",
-                "value": pair.question,
-            },
-            {
-                "from": "gpt",
-                "value": f"{_citation(pair)}\n\n{pair.answer}",
-            },
+            {"from": "human", "value": pair.question},
+            {"from": "gpt",   "value": pair.answer},
         ]
     }
 
 
-# ──────────────────────────────────────────────────────────────
-# Main export function
-# ──────────────────────────────────────────────────────────────
+# ── Main export function ──────────────────────────────────────────────────────
 
 def export_job(job_id: int, fmt: str = "alpaca") -> Path:
     """
-    Export all verified QA pairs for a job.
+    Query all verified QAPairs for job_id, format them, write to
+    data/output/job_{job_id}_{fmt}.json, and return the Path.
 
-    Parameters
-    ----------
-    job_id : int
-        ID of the completed job.
-
-    fmt : str
-        "alpaca" or "sharegpt"
-
-    Returns
-    -------
-    Path
-        Path to exported JSON file.
-    """
-
-    converters = {
-        "alpaca": _to_alpaca,
-        "sharegpt": _to_sharegpt,
-    }
-
-    if fmt not in converters:
-        raise ValueError(
-            f"Unsupported format '{fmt}'. "
-            f"Supported formats: {list(converters.keys())}"
-        )
-
-    with Session(engine) as session:
-        pairs = session.exec(
+    Implementation guide:
+    1.  Open a Session and query:
             select(QAPair).where(
                 QAPair.job_id == job_id,
                 QAPair.quote_verified == True,
             )
-        ).all()
+        If result is empty, raise ValueError("No verified pairs for this job").
 
-    if not pairs:
-        raise ValueError(
-            f"No verified QA pairs found for job {job_id}."
-        )
+    2.  Choose converter:
+            converters = {"alpaca": _to_alpaca, "sharegpt": _to_sharegpt}
+            convert = converters[fmt]
 
-    convert = converters[fmt]
+    3.  Build the list:
+            data = [convert(p) for p in pairs]
 
-    data = [
-        convert(pair)
-        for pair in pairs
-    ]
+    4.  Write to output file:
+            out_dir = Path(settings.data_output_dir)
+            out_dir.mkdir(parents=True, exist_ok=True)
+            out_path = out_dir / f"job_{job_id}_{fmt}.json"
+            out_path.write_text(
+                json.dumps(data, indent=2, ensure_ascii=False),
+                encoding="utf-8",
+            )
 
-    out_dir = Path(settings.data_output_dir)
-    out_dir.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    out_path = out_dir / f"job_{job_id}_{fmt}.json"
-
-    out_path.write_text(
-        json.dumps(
-            data,
-            indent=2,
-            ensure_ascii=False,
-        ),
-        encoding="utf-8",
-    )
-
-    print("=" * 60)
-    print("IFT DATASET EXPORT")
-    print("=" * 60)
-    print(f"Job ID      : {job_id}")
-    print(f"Format      : {fmt}")
-    print(f"Records     : {len(data)}")
-    print(f"Output File : {out_path}")
-    print("=" * 60)
-
-    return out_path
+    5.  Print a summary and return out_path.
+    """
+    raise NotImplementedError
 
 
-# ──────────────────────────────────────────────────────────────
-# Quick inspection script
-# ──────────────────────────────────────────────────────────────
+# ── Quick inspection script ───────────────────────────────────────────────────
 
 if __name__ == "__main__":
+    """
+    Usage: python -m app.export.formatter <job_id> [alpaca|sharegpt]
 
+    Exports and prints the first 3 records so you can verify the format
+    before loading it into your training framework.
+    """
     if len(sys.argv) < 2:
-        print(
-            "Usage:\n"
-            "python -m app.export.formatter <job_id> "
-            "[alpaca|sharegpt]"
-        )
+        print("Usage: python -m app.export.formatter <job_id> [alpaca|sharegpt]")
         sys.exit(1)
 
     job_id = int(sys.argv[1])
-
-    fmt = (
-        sys.argv[2]
-        if len(sys.argv) > 2
-        else "alpaca"
-    )
+    fmt    = sys.argv[2] if len(sys.argv) > 2 else "alpaca"
 
     path = export_job(job_id, fmt)
+    print(f"\nExported to: {path}")
 
-    print(f"\nExport completed successfully.")
-    print(f"Saved to: {path}")
-
-    data = json.loads(
-        path.read_text(
-            encoding="utf-8"
-        )
-    )
-
-    print(f"\nTotal records: {len(data)}")
-
-    print("\n========== SAMPLE RECORDS ==========\n")
-
+    data = json.loads(path.read_text(encoding="utf-8"))
+    print(f"Total records: {len(data)}")
+    print("\n=== First 3 records ===")
     for record in data[:3]:
-        print(
-            json.dumps(
-                record,
-                indent=2,
-                ensure_ascii=False,
-            )
-        )
+        print(json.dumps(record, indent=2, ensure_ascii=False))
         print()

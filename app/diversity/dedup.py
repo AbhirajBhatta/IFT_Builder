@@ -33,7 +33,6 @@ def _get_model():
     global _model
     if _model is None:
         from sentence_transformers import SentenceTransformer
-
         # all-MiniLM-L6-v2: 384-dim, fast, good semantic similarity
         _model = SentenceTransformer("all-MiniLM-L6-v2")
     return _model
@@ -91,32 +90,11 @@ def is_duplicate(
 
     Since embeddings are L2-normalised, cosine_sim(a, b) = dot(a, b).
 
-    Parameters
-    ----------
-    candidate : np.ndarray
-        Embedding of the candidate question.
-
-    accepted : list[np.ndarray]
-        List of embeddings of already-accepted questions.
-
-    Returns
-    -------
-    tuple[bool, float]
-        (is_duplicate, highest_similarity)
+    Implementation guide:
+    1.  If accepted is empty: return (False, 0.0)
+    2.  matrix = np.stack(accepted)          # shape (N, 384)
+    3.  scores = matrix @ candidate          # shape (N,) — cosine similarities
+    4.  best   = float(scores.max())
+    5.  return (best >= settings.dedup_similarity_threshold, best)
     """
-
-    # No previous questions → cannot be duplicate.
-    if not accepted:
-        return False, 0.0
-
-    # Shape: (N, 384)
-    matrix = np.stack(accepted)
-
-    # Cosine similarity (dot product because embeddings are normalized)
-    scores = matrix @ candidate
-
-    # Maximum similarity
-    best = float(np.max(scores))
-
-    # Compare with configured threshold
-    return best >= settings.dedup_similarity_threshold, best
+    raise NotImplementedError
