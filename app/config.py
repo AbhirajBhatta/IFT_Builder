@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     llm_model: str = "gpt-4o"
     n_questions_per_chunk: int = 5
     m_variations_per_question: int = 3
-    dedup_similarity_threshold: float = 0.85
+    dedup_similarity_threshold: float = 0.75
     chunk_max_tokens: int = 600
     chunk_overlap_tokens: int = 75
     db_path: str = "db/ift.db"
