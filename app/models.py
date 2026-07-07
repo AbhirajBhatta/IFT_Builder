@@ -25,8 +25,8 @@ class ChunkStatus(str, Enum):
 
 class Job(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
-    document_name: str                        # original filename, e.g. "hr_handbook.pdf"
-    document_type: str                        # "hr" | "finance"
+    document_name: str                        # original filename, e.g. "im_policy.pdf"
+    document_type: str                        # defaulted server-side (routes.py); no longer user-facing
     status: JobStatus = JobStatus.PENDING
     total_chunks: int = 0
     completed_chunks: int = 0
@@ -34,6 +34,11 @@ class Job(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     error_message: Optional[str] = None
+
+    # Per-job dataset size overrides — None means "use settings default"
+    # (see config.py: n_questions_per_chunk=5, m_variations_per_question=3)
+    n_questions_per_chunk: Optional[int] = None
+    m_variations_per_question: Optional[int] = None
 
 
 class Chunk(SQLModel, table=True):

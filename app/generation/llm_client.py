@@ -59,4 +59,32 @@ async def chat_completion(
         async with httpx.AsyncClient(timeout=120.0) as client:
             response = await client.post(url, headers=headers, json=payload)
     """
-    raise NotImplementedError
+    url = f"{settings.llm_base_url}/chat/completions"
+    headers = {"Authorization": f"Bearer {settings.llm_api_key}"}
+    payload = {
+        "model": settings.llm_model,
+        "messages": messages,
+        "temperature": temperature,
+        "max_tokens": max_tokens,
+    }
+
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        for attempt in range(MAX_RETRIES):
+            response = await client.post(url, headers=headers, json=payload)
+
+            if response.status_code == 200:
+                data = response.json()
+                return data["choices"][0]["message"]["content"]
+
+            if response.status_code == 429 or response.status_code >= 500:
+                if attempt < MAX_RETRIES - 1:
+                    await asyncio.sleep(BASE_DELAY * (2 ** attempt))
+                    continue
+                raise RuntimeError(
+                    f"LLM request failed after {MAX_RETRIES} attempts: "
+                    f"{response.status_code} {response.text}"
+                )
+
+            raise RuntimeError(f"LLM request failed: {response.status_code} {response.text}")
+
+    raise RuntimeError(f"LLM request failed after {MAX_RETRIES} attempts")

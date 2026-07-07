@@ -39,7 +39,9 @@ from app.config import get_settings
 from app.database import engine
 from app.diversity.dedup import encode_question, embedding_to_json, is_duplicate, load_accepted_embeddings
 from app.generation.qa_generator import generate_qa_pairs, generate_variations
-from app.generation.verifier import verify_qa_pair, autocorrect_quote
+from app.generation.verifier import (
+    verify_qa_pair, autocorrect_quote, strip_citation, rebuild_answer, build_citation_header,
+)
 from app.models import Chunk, ChunkStatus, Job, JobStatus, QAPair
 
 settings = get_settings()
@@ -216,4 +218,129 @@ async def run_job(job_id: int) -> None:
             Else: DONE
         _set_job_status(job_id, final_status)
     """
-    raise NotImplementedError
+    _set_job_status(job_id, JobStatus.GENERATING)
+
+    with Session(engine) as s:
+        job = s.get(Job, job_id)
+        n_questions = job.n_questions_per_chunk
+        m_variations = job.m_variations_per_question
+
+    accepted_embeddings = load_accepted_embeddings(job_id)
+    chunks = _get_pending_chunks(job_id)
+
+    for chunk in chunks:
+        if chunk.retry_count >= MAX_CHUNK_RETRIES:
+            logger.warning(f"Chunk {chunk.id} exceeded max retries, marking failed")
+            _mark_chunk(chunk.id, ChunkStatus.FAILED, error="Max retries exceeded")
+            await asyncio.sleep(0)
+            continue
+
+        _mark_chunk(chunk.id, ChunkStatus.IN_PROGRESS)
+        try:
+            pairs = await generate_qa_pairs(
+                chunk_text=chunk.text,
+                chapter=chunk.chapter,
+                section=chunk.section_title or "",
+                start_page=chunk.start_page,
+                end_page=chunk.end_page,
+                n=n_questions,
+            )
+
+            for base_idx, pair in enumerate(pairs):
+                question = pair["question"]
+                answer = pair["answer"]
+
+                # --- Verification ---
+                verified, score = verify_qa_pair(answer, chunk.text)
+                if not verified:
+                    corrected = autocorrect_quote(answer, chunk.text)
+                    if corrected:
+                        answer = corrected
+                        verified = True
+                        score = 100.0
+                    else:
+                        logger.warning(
+                            f"Chunk {chunk.id} Q{base_idx}: quote rejected "
+                            f"(score={score:.1f})"
+                        )
+                        continue
+
+                # --- Rebuild header from trusted chunk metadata ---
+                # The LLM sometimes mangles its own citation header (e.g.
+                # literally writing "None" for table-derived chunks) even
+                # when the quote body is fine — never trust that text.
+                quote = strip_citation(answer).strip()
+                trusted_header = build_citation_header(
+                    chunk.chapter, chunk.section_title, chunk.start_page, chunk.end_page
+                )
+                answer = rebuild_answer(trusted_header, quote)
+
+                # --- Dedup check ---
+                q_emb = encode_question(question)
+                dup, sim = is_duplicate(q_emb, accepted_embeddings)
+                if dup:
+                    logger.info(
+                        f"Chunk {chunk.id} Q{base_idx}: duplicate "
+                        f"(sim={sim:.3f}), skipping"
+                    )
+                    continue
+
+                # --- Save base QA pair ---
+                _save_qa_pair(QAPair(
+                    job_id=job_id,
+                    chunk_id=chunk.id,
+                    question=question,
+                    base_question_index=base_idx,
+                    variation_index=0,
+                    answer=answer,
+                    quote_verified=verified,
+                    chapter=chunk.chapter,
+                    section_title=chunk.section_title,
+                    start_page=chunk.start_page,
+                    end_page=chunk.end_page,
+                    question_embedding=embedding_to_json(q_emb),
+                ))
+                accepted_embeddings.append(q_emb)
+
+                # --- Generate and save variations ---
+                variations = await generate_variations(question, m=m_variations)
+                for v_idx, v_question in enumerate(variations, start=1):
+                    v_emb = encode_question(v_question)
+                    v_dup, v_sim = is_duplicate(v_emb, accepted_embeddings)
+                    if v_dup:
+                        continue
+                    _save_qa_pair(QAPair(
+                        job_id=job_id,
+                        chunk_id=chunk.id,
+                        question=v_question,
+                        base_question_index=base_idx,
+                        variation_index=v_idx,
+                        answer=answer,     # same verified answer
+                        quote_verified=True,
+                        chapter=chunk.chapter,
+                        section_title=chunk.section_title,
+                        start_page=chunk.start_page,
+                        end_page=chunk.end_page,
+                        question_embedding=embedding_to_json(v_emb),
+                    ))
+                    accepted_embeddings.append(v_emb)
+
+            _mark_chunk(chunk.id, ChunkStatus.DONE)
+
+        except Exception as exc:
+            logger.error(f"Chunk {chunk.id} failed: {exc}", exc_info=True)
+            _mark_chunk(chunk.id, ChunkStatus.FAILED, error=str(exc))
+
+        await asyncio.sleep(0)  # yield to event loop → SSE can fire
+
+    with Session(engine) as s:
+        job = s.get(Job, job_id)
+        if job.completed_chunks + job.failed_chunks == job.total_chunks:
+            final_status = (
+                JobStatus.FAILED if job.failed_chunks == job.total_chunks
+                else JobStatus.DONE
+            )
+        else:
+            final_status = JobStatus.FAILED
+
+    _set_job_status(job_id, final_status)

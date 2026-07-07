@@ -55,12 +55,31 @@ def strip_citation(answer: str) -> str:
 
     Edge case: if no ']' is found, return the whole answer stripped.
     """
-    raise NotImplementedError
+    if ']' not in answer:
+        return answer.strip()
+
+    idx = answer.index(']')
+    rest = answer[idx + 1:]
+    newline_idx = rest.find('\n')
+    if newline_idx == -1:
+        return rest.strip()
+    return rest[newline_idx + 1:].strip()
 
 
 def rebuild_answer(citation_header: str, corrected_quote: str) -> str:
     """Reconstruct a full answer string from its two parts."""
     return f"{citation_header}\n{corrected_quote}"
+
+
+def build_citation_header(chapter: str, section: str | None, start_page: int, end_page: int) -> str:
+    """
+    Build a citation header from trusted chunk metadata (DB columns), not the
+    LLM's own header text. The LLM sometimes mangles the header it was asked
+    to copy (e.g. literally writing "None" for table-derived chunks) even
+    when the quote body itself is fine — this guarantees a correct header
+    regardless of what the LLM produced.
+    """
+    return f"[Chapter: {chapter} | Section: {section or ''} | Pages: {start_page}-{end_page}]"
 
 
 def extract_citation_header(answer: str) -> str:
@@ -105,7 +124,27 @@ def verify_qa_pair(answer: str, source_chunk_text: str) -> tuple[bool, float]:
                     break   # can't do better
             return (best >= FUZZY_THRESHOLD, best)
     """
-    raise NotImplementedError
+    quote = strip_citation(answer).strip()
+    if not quote:
+        return (False, 0.0)
+
+    if quote in source_chunk_text:
+        return (True, 100.0)
+
+    window_size = len(quote)
+    if window_size > len(source_chunk_text):
+        score = fuzz.token_sort_ratio(quote, source_chunk_text)
+        return (score >= FUZZY_THRESHOLD, score)
+
+    best = 0.0
+    for i in range(0, len(source_chunk_text) - window_size + 1, WINDOW_STEP):
+        window = source_chunk_text[i:i + window_size]
+        score = fuzz.token_sort_ratio(quote, window)
+        if score > best:
+            best = score
+        if best == 100.0:
+            break
+    return (best >= FUZZY_THRESHOLD, best)
 
 
 # ── Optional autocorrect ──────────────────────────────────────────────────────
@@ -130,7 +169,31 @@ def autocorrect_quote(answer: str, source_chunk_text: str) -> str | None:
     4.  If best_score < FUZZY_THRESHOLD: return None
     5.  return rebuild_answer(header, best_span)
     """
-    raise NotImplementedError
+    quote = strip_citation(answer).strip()
+    header = extract_citation_header(answer)
+
+    if not quote:
+        return None
+
+    window_size = len(quote)
+    if window_size > len(source_chunk_text):
+        best_score = fuzz.token_sort_ratio(quote, source_chunk_text)
+        best_span = source_chunk_text
+    else:
+        best_score = 0.0
+        best_span = ""
+        for i in range(0, len(source_chunk_text) - window_size + 1, WINDOW_STEP):
+            window = source_chunk_text[i:i + window_size]
+            score = fuzz.token_sort_ratio(quote, window)
+            if score > best_score:
+                best_score = score
+                best_span = window
+            if best_score == 100.0:
+                break
+
+    if best_score < FUZZY_THRESHOLD:
+        return None
+    return rebuild_answer(header, best_span)
 
 
 # ── Quick manual test ─────────────────────────────────────────────────────────

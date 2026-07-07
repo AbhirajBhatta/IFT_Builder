@@ -90,7 +90,32 @@ def export_job(job_id: int, fmt: str = "alpaca") -> Path:
 
     5.  Print a summary and return out_path.
     """
-    raise NotImplementedError
+    with Session(engine) as session:
+        pairs = session.exec(
+            select(QAPair).where(
+                QAPair.job_id == job_id,
+                QAPair.quote_verified == True,
+            )
+        ).all()
+
+    if not pairs:
+        raise ValueError("No verified pairs for this job")
+
+    converters = {"alpaca": _to_alpaca, "sharegpt": _to_sharegpt}
+    convert = converters[fmt]
+
+    data = [convert(p) for p in pairs]
+
+    out_dir = Path(settings.data_output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / f"job_{job_id}_{fmt}.json"
+    out_path.write_text(
+        json.dumps(data, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
+    print(f"Exported {len(data)} records to {out_path}")
+    return out_path
 
 
 # ── Quick inspection script ───────────────────────────────────────────────────

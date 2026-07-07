@@ -67,7 +67,26 @@ async def generate_qa_pairs(
         Skip (log and continue) items that are malformed rather than crashing.
     6.  Return the validated list.
     """
-    raise NotImplementedError
+    n_questions = n or settings.n_questions_per_chunk
+
+    system_prompt = QA_SYSTEM.format(
+        chapter=chapter, section=section, start_page=start_page, end_page=end_page
+    )
+    user_prompt = QA_USER.format(chunk_text=chunk_text, n_questions=n_questions)
+
+    response = await chat_completion([
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ])
+
+    raw_pairs = _parse_json_array(response)
+
+    pairs = []
+    for item in raw_pairs:
+        if not isinstance(item, dict) or "question" not in item or "answer" not in item:
+            continue
+        pairs.append({"question": item["question"], "answer": item["answer"]})
+    return pairs
 
 
 async def generate_variations(question: str, m: int | None = None) -> list[str]:
@@ -83,7 +102,18 @@ async def generate_variations(question: str, m: int | None = None) -> list[str]:
     5.  Return list[str]. If fewer than m variations are returned, that's
         acceptable — don't retry just for count.
     """
-    raise NotImplementedError
+    m = m or settings.m_variations_per_question
+
+    system_prompt = VARIATION_SYSTEM.format(m=m)
+    user_prompt = VARIATION_USER.format(question=question, m=m)
+
+    response = await chat_completion([
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ], temperature=0.7)
+
+    variations = _parse_json_array(response)
+    return [v for v in variations if isinstance(v, str)]
 
 
 # ── Quick manual test ─────────────────────────────────────────────────────────

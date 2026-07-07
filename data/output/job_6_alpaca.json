@@ -1,0 +1,217 @@
+[
+  {
+    "instruction": "What does this policy establish?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\nThis policy establishes the framework for managing information assets across the organisation, covering governance, access control, and acceptable usage."
+  },
+  {
+    "instruction": "What areas are covered by the framework for managing information assets?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\ngovernance, access control, and acceptable usage."
+  },
+  {
+    "instruction": "What is the responsibility of the officers of the Company?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to monitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What duties are assigned to the Company's officers?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to monitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What are the officers of the Company responsible for monitoring?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to monitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What aspects of the Company do its officers oversee and monitor?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to monitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What are the departments listed under Business Division?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nBusiness Division | Corporate | Shared Services"
+  },
+  {
+    "instruction": "What is responsible for governance oversight of this Policy?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "What entity has governance oversight responsibilities?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "What is the title of section 3?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the content of the section titled '3.  Policy Framework and Management'?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the objective of section 3.1?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What framework is to be established and maintained according to section 3.1?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What is the scope of applicability for the policy?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "Which documents are covered by the applicability of the policy?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "What are the components of the Information Management Policy Framework?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\nThe Information Management Policy Framework consists of the following: 3.3.1  Policy - Organisation level controls. 3.3.2  Standards, Procedures and Frameworks - defined centrally for standardisation. 3.3.3  Standard Operating Procedures - defined at Division / Shared Services level. 3.3.4  Guidelines and Templates - best practices for reference."
+  },
+  {
+    "instruction": "How often shall the Policy be reviewed by the CITSC?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\n3.3.5  The Policy shall be reviewed by the CITSC at least once every 2 years."
+  },
+  {
+    "instruction": "What are the components listed under section 3.4?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.4  Documentation and Records | Pages: 6-6]\n- Information Management Policy\n- Standards, Procedures and Frameworks"
+  },
+  {
+    "instruction": "What should be done with IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "How should IT Assets be managed or utilized",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "How should IT Assets be recorded?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What is the proper procedure for documenting IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What are examples of Endpoint assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nLaptop, Desktop"
+  },
+  {
+    "instruction": "What are examples of Network assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "Can you provide instances of assets found in a network?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "What is the title of section 6?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.  User Access Management | Pages: 8-8]\n6.  User Access Management"
+  },
+  {
+    "instruction": "What is the section title of the policy?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.3  Policy | Pages: 8-8]\n6.3  Policy"
+  },
+  {
+    "instruction": "What is the chapter number of the policy section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.3  Policy | Pages: 8-8]\n6.3  Policy"
+  },
+  {
+    "instruction": "What shall CDIO / DMM define for IT facilities?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.1  CDIO / DMM shall define Role-wise User Access Matrix for IT facilities."
+  },
+  {
+    "instruction": "What shall be signed by Contractors and Suppliers?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.4  Contractors and Suppliers shall sign a confidentiality agreement."
+  },
+  {
+    "instruction": "What documents require the signature of Contractors and Suppliers?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.4  Contractors and Suppliers shall sign a confidentiality agreement."
+  },
+  {
+    "instruction": "What is required for each business application?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.6  For each business application, there shall be a defined access procedure."
+  },
+  {
+    "instruction": "How often shall a formal review of user access rights be carried out?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.7  A formal review of user access rights shall be carried out every six months."
+  },
+  {
+    "instruction": "What is the title of this section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "How is this section labeled",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "What text is present in this section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "What words are contained within this section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "What is the full form of CDIO?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nCDIO | Chief Digital Information Officer"
+  },
+  {
+    "instruction": "What does CDIO stand for",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nCDIO | Chief Digital Information Officer"
+  },
+  {
+    "instruction": "What does DCE stand for?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nDCE | Divisional Chief Executive"
+  },
+  {
+    "instruction": "What is the first word in the glossary section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nGlossary"
+  },
+  {
+    "instruction": "What is an Information Asset?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nAny data of value to the organisation"
+  },
+  {
+    "instruction": "What is a Class A Application?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nApplication handling sensitive transactions"
+  }
+]

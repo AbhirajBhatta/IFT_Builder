@@ -1,0 +1,662 @@
+[
+  {
+    "instruction": "What is the purpose of this policy?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\nThis policy establishes the framework for managing information assets across the organisation, covering governance, access control, and acceptable usage."
+  },
+  {
+    "instruction": "What areas are covered by this policy?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\ngovernance, access control, and acceptable usage."
+  },
+  {
+    "instruction": "What regions does this policy apply to?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\ngovernance, access control, and acceptable usage."
+  },
+  {
+    "instruction": "What type of assets are managed by this policy?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\ninformation assets"
+  },
+  {
+    "instruction": "What is established by this policy for information assets?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.  Introduction | Pages: 4-4]\nthe framework for managing information assets"
+  },
+  {
+    "instruction": "What section of the document discusses responsibility?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "Whose responsibility is it to monitor compliance with the Policy?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "Who is accountable for ensuring adherence to the Policy?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "Which party is tasked with overseeing compliance with the Policy?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What are the officers of the Company responsible for monitoring?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What duties do the Company officers have in terms of oversight?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What aspects of the Company are its officers tasked with keeping track of?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What policy are the officers of the Company responsible for monitoring compliance with?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What compliance policy falls under the responsibility of the Company's officers?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "With regard to which policy are the Company's officers tasked with monitoring adherence?",
+    "input": "",
+    "output": "[Chapter: 1.  Introduction | Section: 1.3  Responsibility | Pages: 4-4]\nIt shall be the responsibility of the various officers of the Company to\nmonitor compliance with this Policy in their area of operations."
+  },
+  {
+    "instruction": "What are the departments listed under Business Division?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nBusiness Division | Corporate | Shared Services"
+  },
+  {
+    "instruction": "What is the role of DCE?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDCE | Corporate HoD | Group CDIO"
+  },
+  {
+    "instruction": "What are the roles of DMC?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDMC | CITSC | CITSC"
+  },
+  {
+    "instruction": "Can you explain the functions of DMC?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDMC | CITSC | CITSC"
+  },
+  {
+    "instruction": "What is listed under DITSC?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDITSC | CHQ-ITSC | SSITSC"
+  },
+  {
+    "instruction": "What items are categorized under DITSC?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDITSC | CHQ-ITSC | SSITSC"
+  },
+  {
+    "instruction": "Can you list the entries found under DITSC?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDITSC | CHQ-ITSC | SSITSC"
+  },
+  {
+    "instruction": "What categories fall under the DITSC listing?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nDITSC | CHQ-ITSC | SSITSC"
+  },
+  {
+    "instruction": "What is the first department listed?",
+    "input": "",
+    "output": "[Chapter: None | Section: None | Pages: None]\nBusiness Division | Corporate | Shared Services"
+  },
+  {
+    "instruction": "What is the role of CITSC in relation to this Policy?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "Who is responsible for governance oversight of this Policy?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "Which individual or group is accountable for overseeing this Policy?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "Who holds responsibility for ensuring this Policy is properly governed?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "What type of oversight is the CITSC responsible for?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "What does the CITSC oversee in terms of governance?",
+    "input": "",
+    "output": "[Chapter: 2.  Policy Governance | Section: 2.  Policy Governance | Pages: 5-5]\nThe CITSC shall be responsible for governance oversight of this Policy."
+  },
+  {
+    "instruction": "What is the title of section 3?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "How is section 3 labeled?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the chapter number of the Policy Framework and Management section?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the section title that is also numbered 3?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the heading of the provided excerpt?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the title of the given excerpt?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "Can you identify the heading in the text?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What heading is associated with the provided passage?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.  Policy Framework and Management | Pages: 6-6]\n3.  Policy Framework and Management"
+  },
+  {
+    "instruction": "What is the main goal of section 3.1?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "How does section 3.1 contribute to the overall aim?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What does the framework for Information Management Policy aim to do?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What is the purpose of the objective outlined in section 3.1?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What is being established and maintained according to section 3.1?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "Can you explain what section 3.1 states is being established and maintained?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What type of framework is the objective of section 3.1 focused on?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "Can you identify the framework type that section 3.1 is centered around?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.1  Objective | Pages: 6-6]\nTo establish and maintain the framework for Information Management Policy."
+  },
+  {
+    "instruction": "What is the section title of the given policy?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\n3.2  Applicability"
+  },
+  {
+    "instruction": "What is the applicability of the given policy?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "Can you explain the relevance of the given policy",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "To which documents does the policy apply?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "What range of documents is the policy applicable to?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "What type of documents are related to the Information Management Policy?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "What is stated under section 3.2 Applicability?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.2  Applicability | Pages: 6-6]\nApplicable to all documents related to Information Management Policy."
+  },
+  {
+    "instruction": "How often shall the Policy be reviewed by the CITSC?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\nThe Policy shall be reviewed by the CITSC at least once every 2 years."
+  },
+  {
+    "instruction": "What happens to amendments to the Policy?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\nAmendments shall be put up to the CMC for consideration."
+  },
+  {
+    "instruction": "Can you explain the process for updating the Policy with amendments?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\nAmendments shall be put up to the CMC for consideration."
+  },
+  {
+    "instruction": "At what level are Standard Operating Procedures defined?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\n3.3.3  Standard Operating Procedures - defined at Division / Shared Services level."
+  },
+  {
+    "instruction": "What are Guidelines and Templates used for?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.3  Policy | Pages: 6-6]\n3.3.4  Guidelines and Templates - best practices for reference."
+  },
+  {
+    "instruction": "What policy is mentioned in the excerpt?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.4  Documentation and Records | Pages: 6-6]\n- Information Management Policy"
+  },
+  {
+    "instruction": "What are the items listed in section 3.4?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.4  Documentation and Records | Pages: 6-6]\n- Information Management Policy\n- Standards, Procedures and Frameworks"
+  },
+  {
+    "instruction": "Could you specify the contents of section 3.4?",
+    "input": "",
+    "output": "[Chapter: 3.  Policy Framework and Management | Section: 3.4  Documentation and Records | Pages: 6-6]\n- Information Management Policy\n- Standards, Procedures and Frameworks"
+  },
+  {
+    "instruction": "What shall be done with IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "How should IT Assets be managed?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What is the proper procedure for handling IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "Where shall IT Assets be recorded?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What is the designated location for recording IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "How should IT Assets be documented in terms of location?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "In which records should IT Assets be listed?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What type of register shall IT Assets be recorded in?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "How should IT Assets be registered?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What is required for IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "Can you outline the necessary elements for IT Assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nIT Assets shall be recorded in a central asset register."
+  },
+  {
+    "instruction": "What are examples of Endpoint assets?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nLaptop, Desktop"
+  },
+  {
+    "instruction": "What type of assets include Router and Switch?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "Which category of assets encompasses devices such as Routers and Switches?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "Can you classify Routers and Switches in terms of asset type?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "What is an example of a Network asset?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "How does a typical Network asset manifest?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "What asset category includes Firewall?",
+    "input": "",
+    "output": "[Chapter: 4.  IT Asset Management | Section: 4.  IT Asset Management | Pages: 7-7]\nRouter, Switch, Firewall"
+  },
+  {
+    "instruction": "What is the title of section 6?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.  User Access Management | Pages: 8-8]\n6.  User Access Management"
+  },
+  {
+    "instruction": "How is section 6 labeled?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.  User Access Management | Pages: 8-8]\n6.  User Access Management"
+  },
+  {
+    "instruction": "What is the chapter number of User Access Management?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.  User Access Management | Pages: 8-8]\n6"
+  },
+  {
+    "instruction": "What is the section number of User Access Management?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.  User Access Management | Pages: 8-8]\n6"
+  },
+  {
+    "instruction": "What section is User Access Management located in?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.  User Access Management | Pages: 8-8]\n6"
+  },
+  {
+    "instruction": "What is the section number of the policy?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.3  Policy | Pages: 8-8]\n6.3  Policy"
+  },
+  {
+    "instruction": "What is the text that immediately follows '6.3' in the policy section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.3  Policy | Pages: 8-8]\n  Policy"
+  },
+  {
+    "instruction": "What is the text of section 6.3?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.3  Policy | Pages: 8-8]\n6.3  Policy"
+  },
+  {
+    "instruction": "What does section 6.3 state?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: 6.3  Policy | Pages: 8-8]\n6.3  Policy"
+  },
+  {
+    "instruction": "What should CDIO / DMM define for IT facilities?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.1  CDIO / DMM shall define Role-wise User Access Matrix for IT facilities."
+  },
+  {
+    "instruction": "How shall IT Access be provided?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.2  IT Access shall be provided following Role-wise User Access Matrix."
+  },
+  {
+    "instruction": "What methods will be used to provide IT Access?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.2  IT Access shall be provided following Role-wise User Access Matrix."
+  },
+  {
+    "instruction": "Can you describe the process for granting IT Access?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.2  IT Access shall be provided following Role-wise User Access Matrix."
+  },
+  {
+    "instruction": "What approach will be taken to deliver IT Access to users?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.2  IT Access shall be provided following Role-wise User Access Matrix."
+  },
+  {
+    "instruction": "What is the basis for providing IT access to third-party users?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.3  Third-party users shall be provided IT access per engagement terms."
+  },
+  {
+    "instruction": "How do you determine when to provide third-party users with IT access?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.3  Third-party users shall be provided IT access per engagement terms."
+  },
+  {
+    "instruction": "What agreement shall Contractors and Suppliers sign?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.4  Contractors and Suppliers shall sign a confidentiality agreement."
+  },
+  {
+    "instruction": "What kind of websites' access shall be controlled?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.5  Access to undesirable websites shall be controlled."
+  },
+  {
+    "instruction": "How can access to certain kinds of websites be regulated?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Access Registration | Pages: 8-8]\n6.3.5  Access to undesirable websites shall be controlled."
+  },
+  {
+    "instruction": "What is required for each business application?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.6  For each business application, there shall be a defined access procedure."
+  },
+  {
+    "instruction": "Can you outline the necessary elements for every business application?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.6  For each business application, there shall be a defined access procedure."
+  },
+  {
+    "instruction": "How does each business application define its necessary components?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.6  For each business application, there shall be a defined access procedure."
+  },
+  {
+    "instruction": "How often shall a formal review of user access rights be carried out?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.7  A formal review of user access rights shall be carried out every six months."
+  },
+  {
+    "instruction": "Can you specify the periodicity at which user access rights should be formally assessed?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.7  A formal review of user access rights shall be carried out every six months."
+  },
+  {
+    "instruction": "At what intervals should a formal examination of user access rights be conducted?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.7  A formal review of user access rights shall be carried out every six months."
+  },
+  {
+    "instruction": "What type of review of user access rights is required?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Application Access Control | Pages: 9-9]\n6.3.7  A formal review of user access rights shall be carried out every six months."
+  },
+  {
+    "instruction": "What is the title of this section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "Can you tell me the title of this part?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "How is this section headed?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "Is the section titled 'Introduction'?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "What word is written at the top of the page?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "Does the section have a title?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "Does a title exist for this particular section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "What is written in the excerpt?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "Can you tell me the content of the excerpt?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviations"
+  },
+  {
+    "instruction": "What does CDIO stand for?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nCDIO | Chief Digital Information Officer"
+  },
+  {
+    "instruction": "What is the full form of CITSC?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nCITSC | Corporate IT Steering Committee"
+  },
+  {
+    "instruction": "Can you expand the acronym CITSC",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nCITSC | Corporate IT Steering Committee"
+  },
+  {
+    "instruction": "What is the full form of DCE?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nDCE | Divisional Chief Executive"
+  },
+  {
+    "instruction": "Can you explain the meaning of the abbreviation DCE?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nDCE | Divisional Chief Executive"
+  },
+  {
+    "instruction": "What are the abbreviations listed?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Abbreviations | Pages: 10-10]\nAbbreviation | Full Form\nCDIO | Chief Digital Information Officer\nCITSC | Corporate IT Steering Committee\nDITSC | Divisional IT Steering Committee\nDCE | Divisional Chief Executive"
+  },
+  {
+    "instruction": "Is there a chapter title mentioned in the excerpt?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nGlossary"
+  },
+  {
+    "instruction": "What is the name of the section?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nGlossary"
+  },
+  {
+    "instruction": "Are there any definitions provided in the excerpt?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nGlossary"
+  },
+  {
+    "instruction": "Are definitions provided within the excerpt?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nGlossary"
+  },
+  {
+    "instruction": "Does the excerpt offer any defined terms?",
+    "input": "",
+    "output": "[Chapter: 6.  User Access Management | Section: Glossary | Pages: 10-10]\nGlossary"
+  },
+  {
+    "instruction": "What is an Information Asset?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nAny data of value to the organisation"
+  },
+  {
+    "instruction": "What is a Third Party?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nExternal vendor, contractor, or supplier"
+  },
+  {
+    "instruction": "What constitutes a Third Party entity?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nExternal vendor, contractor, or supplier"
+  },
+  {
+    "instruction": "What is a Class A Application?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nApplication handling sensitive transactions"
+  },
+  {
+    "instruction": "How does a Class A Application differ from other types?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nApplication handling sensitive transactions"
+  },
+  {
+    "instruction": "What kind of transactions does a Class A Application handle?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nApplication handling sensitive transactions"
+  },
+  {
+    "instruction": "How does a Class A Application categorize the transactions it manages?",
+    "input": "",
+    "output": "[Chapter:  | Section:  | Pages: ]\nApplication handling sensitive transactions"
+  }
+]

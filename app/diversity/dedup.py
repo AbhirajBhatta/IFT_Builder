@@ -97,4 +97,10 @@ def is_duplicate(
     4.  best   = float(scores.max())
     5.  return (best >= settings.dedup_similarity_threshold, best)
     """
-    raise NotImplementedError
+    if not accepted:
+        return (False, 0.0)
+
+    matrix = np.stack(accepted)
+    scores = matrix @ candidate
+    best = float(scores.max())
+    return (best >= settings.dedup_similarity_threshold, best)
