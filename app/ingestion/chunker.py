@@ -11,7 +11,7 @@ Chunking hierarchy (in priority order — never cross a chapter boundary):
 Token budget is enforced with tiktoken so it matches the LLM's context window.
 
 Quick start (run directly to inspect chunks):
-    python -m app.ingestion.chunker data/pdfs/hr_handbook.pdf
+    python -m app.ingestion.chunker data/pdfs/im_policy_test.pdf
 """
 from __future__ import annotations
 
@@ -261,7 +261,7 @@ def chunk_document(blocks: list[TextBlock], toc: list[TocEntry]) -> list[RawChun
 
 if __name__ == "__main__":
     """
-    Usage: python -m app.ingestion.chunker data/pdfs/hr_handbook.pdf
+    Usage: python -m app.ingestion.chunker data/pdfs/im_policy_test.pdf
 
     Prints chunk count, token distribution, and first 5 chunks so you can
     verify boundaries and page citations before moving to generation.

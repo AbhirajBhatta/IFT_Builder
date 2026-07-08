@@ -9,3 +9,6 @@ rapidfuzz==3.9.0
 python-dotenv==1.0.1
 pydantic-settings==2.2.1
 httpx==0.27.0
+
+# dev/test only — needed to run tests/smoke_test.py
+pytest==9.1.1

@@ -1,8 +1,14 @@
 # IFT Dataset Builder
 
-Converts HR / Finance handbook PDFs into Instruction Fine-Tuning (IFT) datasets
-for QLoRA/LoRA fine-tuning, with verified verbatim quotes, fault-tolerant
+Converts a company policy handbook PDF into an Instruction Fine-Tuning (IFT)
+dataset for QLoRA/LoRA fine-tuning, with verified verbatim quotes, fault-tolerant
 background processing, and SSE live progress streaming.
+
+**Status: fully implemented and tested end-to-end** (upload → parse → chunk →
+generate → verify → dedup → export), against a synthetic test PDF and real
+Groq API calls. See [Implementation Status](#implementation-status) below for
+what changed from the original 3-day plan, and
+[VDI_MIGRATION.md](VDI_MIGRATION.md) before moving this to the company VDI.
 
 ---
 
@@ -17,6 +23,7 @@ background processing, and SSE live progress streaming.
 | LLM calls   | httpx (async, any OAI-compat.) |
 | Embeddings  | sentence-transformers          |
 | Fuzzy match | RapidFuzz                      |
+| Tests       | pytest (dev only)              |
 
 ---
 
@@ -32,61 +39,97 @@ uvicorn app.main:app --reload
 
 Open http://localhost:8000 — upload a PDF, click Start Generation.
 
----
-
-## 3-Day Implementation Plan
-
-### Day 1 — Person A: Parsing
-1. `app/ingestion/parser.py` — implement `parse_pdf()` and `extract_toc()`
-2. `app/ingestion/chunker.py` — implement `chunk_document()`
-3. **Validate**: `python -m app.ingestion.chunker data/pdfs/hr_handbook.pdf`
-   Print chunks, check page numbers match real PDF, check no chapter boundary crossings.
-4. **EOD sync with Person B**: share `RawChunk` dataclass fields.
-   Confirm they match `Chunk` model in `app/models.py`.
-
-### Day 1 — Person B: Infrastructure
-1. `requirements.txt`, `.env`, `app/config.py`, `app/database.py` — already written, review and install.
-2. `app/models.py` — already written, review field names with Person A at EOD.
-3. `app/generation/prompts.py` — already written, read and understand the citation format.
-4. **Run**: `uvicorn app.main:app --reload` — confirm startup creates `db/ift.db`.
-
-### Day 2 — Person A: Generation + Verification
-1. `app/generation/llm_client.py` — implement `chat_completion()`
-2. `app/generation/qa_generator.py` — implement `generate_qa_pairs()` and `generate_variations()`
-3. `app/generation/verifier.py` — implement `strip_citation()`, `verify_qa_pair()`, `autocorrect_quote()`
-4. **Validate**: `python -m app.generation.qa_generator` (uses built-in sample chunk)
-   Check that returned quotes exist verbatim in the source text.
-5. **EOD sync**: run `python -m app.generation.verifier` — confirm GOOD passes, BAD fails.
-
-### Day 2 — Person B: Worker + Dedup
-1. `app/diversity/dedup.py` — implement `is_duplicate()`
-2. `app/worker/runner.py` — implement `run_job()` following the step-by-step guide in the file
-3. **Validate**: call `run_job()` in a small asyncio script on one real chunk.
-   Check a QAPair row appears in the DB with `quote_verified=True`.
-4. **EOD sync**: Person A tests qa_generator on a real chunk, Person B feeds output to runner.
-   Fix any interface mismatch (e.g. missing fields, wrong key names in pair dict).
-
-### Day 3 — Person A: API Routes + SSE
-1. `app/api/routes.py` — implement `create_job()` and `export_dataset()`
-2. `app/api/sse.py` — already written, just included in router via `main.py`
-3. `app/main.py` — already written
-4. **Validate**: POST to `/jobs/` with a real PDF via curl or the browser.
-   Watch SSE events fire in browser DevTools → Network → EventStream.
-
-### Day 3 — Person B: Export + Frontend + E2E
-1. `app/export/formatter.py` — implement `export_job()`
-2. `frontend/index.html` — already written, test in browser
-3. **Validate**: `python -m pytest tests/smoke_test.py -v`
-4. Full end-to-end test: upload real handbook, wait for completion, download JSON,
-   load into training framework and confirm it parses.
+Run the test suite: `python -m pytest tests/smoke_test.py -v`
 
 ---
 
-## Resuming an Interrupted Job
+## Implementation Status
 
-The DB is the checkpoint. On restart, simply call `run_job(job_id)` again.
-`_get_pending_chunks()` returns all chunks not in `done` state — including
-`in_progress` chunks from the crashed run — so the job continues from where it stopped.
+Everything in the original ownership split (parsing, chunking, generation,
+verification, worker/checkpointing, dedup, export, routes) is implemented and
+has been run end-to-end multiple times against both a synthetic test PDF and
+the real Groq API. Deviations from the original plan below.
+
+### General "add PDF" instead of HR/Finance document types
+The original design assumed two fixed handbooks (`document_type: "hr" |
+"finance"`). The real target is a single company policy document (a 41-page
+Information Management Policy), so the document-type selector was removed
+from the frontend entirely — upload just takes a PDF. `Job.document_type`
+still exists in the schema (defaulted to `"policy"` server-side) so no DB
+migration was needed for this change.
+
+### Chunking handles two heading styles, not just numbering
+The real handbook uses numbered headings (`1.`, `1.1`, `3.2.1`) **and**
+bold+underlined text with no number prefix (e.g. "Access Registration") as a
+secondary heading style. `parser.py` detects underlines by scanning
+`page.get_drawings()` for lines under a span's baseline (PyMuPDF's font flags
+have no underline bit), and `chunker.py` treats both styles as section
+boundaries. Numbered sub-subsections (e.g. `3.3.1`–`3.3.6`) are *not* treated
+as new sections — they fold into their parent section as one chunk, per the
+"stepwise guide" note in the original PDF formatting spec.
+
+### Table detection via PyMuPDF, front-matter excluded
+The parser docstring didn't specify how `block_type="table"` gets set — this
+uses `page.find_tables()` (available in the pinned PyMuPDF 1.24.3) to detect
+table regions and collapse each into one block. Separately, chunker.py now
+skips any page before the first ToC entry's start page, so the title/document
+control/contents pages don't get chunked as fake content.
+
+### Citation headers are rebuilt from trusted DB metadata, not the LLM's own text
+The LLM is asked to prepend a citation header to each answer. In testing,
+this worked for prose chunks but the LLM sometimes wrote `[Chapter: None |
+Section: None | Pages: None]` for table-derived chunks — a real trained-model
+citation risk, since the verifier only validated the quote body, not the
+header. `runner.py` now always rebuilds the header from the chunk's own DB
+columns (`build_citation_header()` in `verifier.py`) after verification
+passes, regardless of what the LLM wrote.
+
+### Per-job configurable dataset size
+`Job.n_questions_per_chunk` / `Job.m_variations_per_question` (nullable —
+`None` falls back to the `.env` defaults) let each upload override
+`N_QUESTIONS_PER_CHUNK`/`M_VARIATIONS_PER_QUESTION` without touching config.
+Exposed in the frontend as two number inputs, pre-filled with the defaults
+(5 questions/chunk, 3 variations/question — sized for a ~40-page document:
+~35 chunks × 5 × 4 ≈ 700 raw variants before dedup, settling to roughly
+300-500 verified pairs). Lower for a quick test run, raise for a larger
+handbook.
+
+### Resuming a job is now an actual API call
+The original plan's checkpoint design (`_get_pending_chunks()` returns
+anything not `done`, including failed chunks under the retry limit) was
+fully implemented, but nothing exposed it — `POST /jobs/` always created a
+brand-new job. Added `POST /jobs/{job_id}/resume`, which just re-launches
+`run_job()` for an existing job id. The frontend shows a "Retry Failed
+Chunks" button when a job finishes with `failed_chunks > 0` (e.g. after
+hitting an LLM provider's rate limit mid-run).
+
+### Known test calibration gap
+`tests/smoke_test.py::test_dedup_detects_near_duplicate` fails against the
+real `all-MiniLM-L6-v2` model — its example question pair scores 0.792
+similarity, just under the configured `DEDUP_SIMILARITY_THRESHOLD=0.85`. The
+`is_duplicate()` implementation itself is correct (verified separately with a
+pair that scores 0.952 and is correctly flagged) — this is either the test's
+example pair being too loosely phrased, or the threshold being stricter than
+intended. Not changed unilaterally since it affects final dataset diversity;
+worth a decision before relying on this test in CI.
+
+---
+
+## Resuming an Interrupted or Rate-Limited Job
+
+The DB is the checkpoint — each `Chunk` row tracks `pending` / `in_progress`
+/ `done` / `failed`, and `Job.completed_chunks` / `failed_chunks` are updated
+per chunk. To resume:
+
+```bash
+curl -X POST http://localhost:8000/jobs/{job_id}/resume
+```
+
+`_get_pending_chunks()` returns everything not `done` — including chunks that
+failed transiently (e.g. an LLM provider's rate limit) and are still under
+`MAX_CHUNK_RETRIES` (3) — so the job continues from where it stopped without
+redoing already-completed chunks. The frontend surfaces this as a "Retry
+Failed Chunks" button once a job finishes with failures.
 
 ---
 
@@ -104,6 +147,9 @@ The DB is the checkpoint. On restart, simply call `run_job(job_id)` again.
 
 The citation header inside `output` is intentional — the fine-tuned model learns
 to emit chapter and page citations as part of every answer at inference time.
+`input` is always empty by design — the instruction is self-contained, no
+extra context is needed. `sharegpt` format is also available via
+`?format=sharegpt` on the export endpoint.
 
 ---
 
@@ -115,10 +161,18 @@ invisible to the model unless you explicitly include it in the text. Putting
 the citation inside `output` means the model learns to produce it.
 
 **Why SQLite and not a real task queue?**
-Two fixed documents, one server, one team. SQLite + asyncio gives resumability
+One document, one server, one team. SQLite + asyncio gives resumability
 without Celery/Redis infrastructure overhead. Revisit if scope grows.
 
 **Why substring/fuzzy match for verification and not just trust the LLM?**
 LLMs comply with "copy verbatim" instructions ~85-90% of the time. The remaining
 10-15% produces confident paraphrases that are impossible to distinguish by eye
 at scale. The verifier catches these programmatically with zero false negatives.
+
+**Why rebuild the citation header from DB metadata instead of trusting the
+LLM's own header text?**
+The verifier only checked the quote body, not the header — and the LLM
+reliably mangled headers for table-derived chunks (writing literal `"None"`)
+even when the quote itself was fine. Since the ground-truth chapter/section/
+page data already lives on the `Chunk` row, reconstructing the header from
+that is strictly more reliable than parsing what the LLM wrote.

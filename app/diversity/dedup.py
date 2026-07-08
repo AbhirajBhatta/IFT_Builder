@@ -8,9 +8,12 @@ that are too similar to already-accepted ones (cosine similarity >= threshold).
 Since embeddings are L2-normalised, cosine similarity = dot product, which
 is a single matrix multiply — fast enough for our scale without FAISS.
 
-Scale estimate for two 500-page handbooks:
-    ~333 chunks * 5 questions * 4 total (1 base + 3 variations) = ~6,660 questions
-    Pairwise at that scale is instant. No clustering needed.
+Scale estimate for the real ~41-page Information Management Policy document:
+    ~35-40 chunks * 5 questions * 4 total (1 base + 3 variations) = ~700-800 questions
+    (revised down from an earlier two-document, 500-page-each assumption —
+    the real target is a single, much shorter document; see README's
+    Implementation Status section). Pairwise at this scale is instant either
+    way. No clustering needed.
 
 The model is loaded lazily on first call so startup time is unaffected.
 """

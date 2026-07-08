@@ -10,7 +10,7 @@ Both are consumed by chunker.py. Keep this file focused on extraction only —
 no chunking logic belongs here.
 
 Quick start (run this file directly to inspect your PDF):
-    python -m app.ingestion.parser data/pdfs/hr_handbook.pdf
+    python -m app.ingestion.parser data/pdfs/im_policy_test.pdf
 """
 from __future__ import annotations
 
@@ -188,8 +188,9 @@ def extract_toc(pdf_path: Path) -> list[TocEntry]:
         Use the two largest distinct font sizes as level-1 and level-2 headings.
         Build TocEntry list from these detections.
 
-    Run Strategy A first on both company PDFs on Day 1 morning.
-    If doc.get_toc() returns a non-empty list, Strategy B is unnecessary.
+    Strategy A always runs first; Strategy B only kicks in if doc.get_toc()
+    returns an empty list (see JUDGMENT CALL below — this is the case for
+    our real handbook, which has no Word bookmarks).
 
     JUDGMENT CALL: our real handbook has no Word bookmarks (confirmed via the
     synthetic test PDF, which also ships without embedded bookmarks), so
@@ -259,7 +260,7 @@ def extract_toc(pdf_path: Path) -> list[TocEntry]:
 
 if __name__ == "__main__":
     """
-    Usage: python -m app.ingestion.parser data/pdfs/hr_handbook.pdf
+    Usage: python -m app.ingestion.parser data/pdfs/im_policy_test.pdf
 
     Prints the first 30 TextBlocks and the full ToC so you can verify
     font sizes, page numbers, and heading detection before building chunker.py.
