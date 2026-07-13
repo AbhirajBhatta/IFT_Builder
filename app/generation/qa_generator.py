@@ -1,7 +1,6 @@
 """
-Day 2 — Person A
 QA Pair Generator
-=================
+==================
 Calls the LLM with a chunk, parses the JSON response, and returns raw
 (unverified) QA dicts.
 
@@ -53,19 +52,11 @@ async def generate_qa_pairs(
     Returns list of {"question": str, "answer": str} dicts.
     These are NOT verified — always pass through verifier.verify_qa_pair().
 
-    Implementation guide:
-    1.  Build the system prompt from QA_SYSTEM, formatting the citation
-        placeholders: {chapter}, {section}, {start_page}, {end_page}.
-    2.  Build the user prompt from QA_USER, formatting {chunk_text} and
-        {n_questions} (use n or settings.n_questions_per_chunk).
-    3.  Call chat_completion([
-            {"role": "system", "content": system_prompt},
-            {"role": "user",   "content": user_prompt},
-        ])
-    4.  Parse with _parse_json_array(response).
-    5.  Validate each item has "question" and "answer" keys.
-        Skip (log and continue) items that are malformed rather than crashing.
-    6.  Return the validated list.
+    Builds the QA_SYSTEM/QA_USER prompts (filling in the citation metadata
+    and chunk text), calls the LLM, and parses the response as a JSON array
+    via _parse_json_array(). Items missing a "question" or "answer" key are
+    skipped rather than raising, so one malformed item doesn't fail the
+    whole chunk. n defaults to settings.n_questions_per_chunk when omitted.
     """
     n_questions = n or settings.n_questions_per_chunk
 
@@ -91,16 +82,14 @@ async def generate_qa_pairs(
 
 async def generate_variations(question: str, m: int | None = None) -> list[str]:
     """
-    Returns list of M rephrased versions of the input question.
+    Returns list of up to m rephrased versions of the input question.
 
-    Implementation guide:
-    1.  m = m or settings.m_variations_per_question
-    2.  Build system + user prompts from VARIATION_SYSTEM / VARIATION_USER.
-    3.  Call chat_completion with low temperature (0.7 is good for variation —
-        slightly higher than QA generation to encourage diverse phrasing).
-    4.  Parse with _parse_json_array(response).
-    5.  Return list[str]. If fewer than m variations are returned, that's
-        acceptable — don't retry just for count.
+    Builds the VARIATION_SYSTEM/VARIATION_USER prompts and calls the LLM at
+    temperature=0.7 (higher than QA generation, to encourage diverse
+    phrasing). Parses the response as a JSON array of strings via
+    _parse_json_array(). m defaults to settings.m_variations_per_question
+    when omitted. Returning fewer than m variations is acceptable — the
+    caller does not retry purely to hit the count.
     """
     m = m or settings.m_variations_per_question
 

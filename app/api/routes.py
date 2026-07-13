@@ -1,5 +1,4 @@
 """
-Day 3 — Person A
 API Routes
 ==========
 POST /jobs/             — ingest PDF, create chunks, launch background job
@@ -36,57 +35,19 @@ async def create_job(
     session: Session = Depends(get_session),
 ):
     """
-    n_questions / m_variations let the frontend override the dataset-size
+    Accepts an uploaded PDF, parses and chunks it, creates the Job row and
+    its Chunk rows, and launches background generation (asyncio.create_task,
+    not awaited — the response returns immediately). Returns
+    {"job_id": ..., "total_chunks": ...}.
+
+    n_questions / m_variations let the caller override the dataset-size
     settings (settings.n_questions_per_chunk / m_variations_per_question)
-    per job. None means "use the .env default" — threaded through to
-    generate_qa_pairs()/generate_variations() by runner.py.
+    for this job only. None means "use the .env default" — threaded through
+    to generate_qa_pairs()/generate_variations() by runner.py.
 
-    NOTE: document_type is no longer a user-facing choice — the original
-    two-document (hr/finance) design assumed two fixed handbooks, but the
-    real target is a single general "add PDF" upload (per user decision).
-    document_type is defaulted server-side below so models.py's Job schema
-    (Person B's, unchanged) doesn't need a migration.
-
-    Implementation guide:
-
-    1.  Save the uploaded file to data/pdfs/<original_filename>.
-        Use shutil.copyfileobj or file.read() + Path.write_bytes().
-        Create data/pdfs/ if it doesn't exist.
-
-    2.  Parse + chunk:
-            pdf_path = Path(settings.data_output_dir).parent / "pdfs" / file.filename
-            blocks   = parse_pdf(pdf_path)
-            toc      = extract_toc(pdf_path)
-            chunks   = chunk_document(blocks, toc)
-
-    3.  Create the Job row and flush to get its id:
-            job = Job(
-                document_name=file.filename,
-                document_type=document_type,
-                status=JobStatus.PARSING,
-                total_chunks=len(chunks),
-            )
-            session.add(job); session.commit(); session.refresh(job)
-
-    4.  Bulk-insert Chunk rows (status=pending):
-            for idx, rc in enumerate(chunks):
-                session.add(Chunk(
-                    job_id=job.id,
-                    chapter=rc.chapter,
-                    section_title=rc.section_title,
-                    start_page=rc.start_page,
-                    end_page=rc.end_page,
-                    chunk_index=idx,
-                    chunk_type=rc.chunk_type,
-                    text=rc.text,
-                ))
-            session.commit()
-
-    5.  Fire the background job (do NOT await):
-            asyncio.create_task(run_job(job.id))
-
-    6.  Return:
-            {"job_id": job.id, "total_chunks": len(chunks)}
+    document_type is not a user-facing input — the frontend takes a single
+    general PDF upload with no document-type selector, so document_type is
+    defaulted server-side (below) to keep models.py's Job schema stable.
     """
     pdf_dir = Path(settings.data_output_dir).parent / "pdfs"
     pdf_dir.mkdir(parents=True, exist_ok=True)
@@ -131,12 +92,11 @@ async def create_job(
 @router.post("/jobs/{job_id}/resume")
 async def resume_job(job_id: int, session: Session = Depends(get_session)):
     """
-    Re-launch run_job() for an existing job. runner.py's checkpoint design
-    (_get_pending_chunks) already picks up anything not 'done' — including
-    chunks that failed transiently (e.g. LLM rate-limit exhaustion) and are
-    still under MAX_CHUNK_RETRIES. This just exposes that resume capability,
-    which previously had no entry point — POST /jobs/ always started a new
-    job with fresh chunks instead of retrying an existing one.
+    Re-launches run_job() for an existing job id. runner.py's checkpoint
+    design (_get_pending_chunks) picks up anything not yet 'done', including
+    chunks that failed transiently (e.g. a rate-limited LLM call) and are
+    still under MAX_CHUNK_RETRIES — this endpoint is how that resume
+    capability is triggered from the API.
     """
     job = session.get(Job, job_id)
     if not job:
@@ -161,11 +121,9 @@ async def export_dataset(
     format: str = Query("alpaca", regex="^(alpaca|sharegpt)$"),
 ):
     """
-    Implementation guide:
-    1.  Call export_job(job_id, format) → returns Path to the output JSON.
-    2.  Return FileResponse(path, media_type="application/json",
-            filename=path.name).
-    3.  Raise 404 if the job doesn't exist or has no verified pairs yet.
+    Exports the job's verified QA pairs in the requested format and returns
+    the file for download. Raises 404 if the job doesn't exist or has no
+    verified pairs yet.
     """
     try:
         path = export_job(job_id, format)

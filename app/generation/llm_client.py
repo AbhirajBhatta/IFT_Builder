@@ -1,5 +1,4 @@
 """
-Day 2 — Person A
 LLM API Client
 ==============
 Thin async wrapper around the provider's chat completions endpoint.
@@ -31,33 +30,12 @@ async def chat_completion(
     """
     Call the LLM and return the raw text content of the first choice.
 
-    Implementation guide:
-    1.  Build the request payload:
-            {
-                "model": settings.llm_model,
-                "messages": messages,
-                "temperature": temperature,
-                "max_tokens": max_tokens,
-            }
-
-    2.  POST to f"{settings.llm_base_url}/chat/completions"
-        with header "Authorization: Bearer {settings.llm_api_key}".
-        Use httpx.AsyncClient with a generous timeout (timeout=120.0).
-
-    3.  On success (status 200):
-            data = response.json()
-            return data["choices"][0]["message"]["content"]
-
-    4.  On 429 (rate limit) or 5xx:
-            sleep BASE_DELAY * (2 ** attempt) seconds, then retry.
-            Raise RuntimeError after MAX_RETRIES attempts.
-
-    5.  On 4xx other than 429 (bad request, auth error):
-            Raise immediately with the response body so the caller can log it.
-
-    Example with httpx:
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(url, headers=headers, json=payload)
+    POSTs to f"{settings.llm_base_url}/chat/completions" with the configured
+    model, messages, temperature, and max_tokens. On a 429 or 5xx response,
+    retries up to MAX_RETRIES times with exponential back-off
+    (BASE_DELAY * 2**attempt seconds), raising RuntimeError if still failing
+    after the final attempt. Any other 4xx response raises immediately with
+    the response body included, so the caller can log the failure.
     """
     url = f"{settings.llm_base_url}/chat/completions"
     headers = {"Authorization": f"Bearer {settings.llm_api_key}"}

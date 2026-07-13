@@ -1,7 +1,6 @@
 """
-Day 3 — Person B
 IFT Dataset Formatter
-=====================
+=======================
 Converts verified QAPair rows into the final JSON training format.
 
 Supported output formats:
@@ -61,34 +60,11 @@ def _to_sharegpt(pair: QAPair) -> dict:
 
 def export_job(job_id: int, fmt: str = "alpaca") -> Path:
     """
-    Query all verified QAPairs for job_id, format them, write to
-    data/output/job_{job_id}_{fmt}.json, and return the Path.
-
-    Implementation guide:
-    1.  Open a Session and query:
-            select(QAPair).where(
-                QAPair.job_id == job_id,
-                QAPair.quote_verified == True,
-            )
-        If result is empty, raise ValueError("No verified pairs for this job").
-
-    2.  Choose converter:
-            converters = {"alpaca": _to_alpaca, "sharegpt": _to_sharegpt}
-            convert = converters[fmt]
-
-    3.  Build the list:
-            data = [convert(p) for p in pairs]
-
-    4.  Write to output file:
-            out_dir = Path(settings.data_output_dir)
-            out_dir.mkdir(parents=True, exist_ok=True)
-            out_path = out_dir / f"job_{job_id}_{fmt}.json"
-            out_path.write_text(
-                json.dumps(data, indent=2, ensure_ascii=False),
-                encoding="utf-8",
-            )
-
-    5.  Print a summary and return out_path.
+    Queries all verified QAPairs for job_id, converts them to the requested
+    format (alpaca or sharegpt), writes the result to
+    data/output/job_{job_id}_{fmt}.json (creating data/output/ if needed),
+    prints a summary, and returns the output Path. Raises ValueError if the
+    job has no verified pairs yet.
     """
     with Session(engine) as session:
         pairs = session.exec(

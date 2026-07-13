@@ -1,7 +1,6 @@
 """
-Day 1 — Person A
 Hierarchical Chunker
-====================
+=====================
 Converts the flat list[TextBlock] + list[TocEntry] from parser.py
 into list[RawChunk] ready for DB insertion.
 
@@ -29,7 +28,7 @@ settings = get_settings()
 _tok = tiktoken.get_encoding("cl100k_base")
 
 
-# ── Output dataclass (sync this with Person B's Chunk model on Day 1 EOD) ────
+# ── Output dataclass (mirrors Chunk in models.py) ─────────────────────────────
 
 @dataclass
 class RawChunk:
@@ -82,7 +81,6 @@ def _is_heading(block: TextBlock, heading_font_size: float) -> bool:
     """
     Heuristic: a block is a section heading if its font_size >= heading_font_size
     and it's short enough to be a title (< 120 chars).
-    Tune heading_font_size after inspecting real PDFs with parser.py.
     """
     return block.font_size >= heading_font_size and len(block.text.strip()) < 120
 
@@ -93,64 +91,31 @@ def chunk_document(blocks: list[TextBlock], toc: list[TocEntry]) -> list[RawChun
     """
     Produce list[RawChunk] in document order.
 
-    Implementation guide:
+    Groups blocks into sections using a detected heading font-size threshold
+    (derived by matching blocks against ToC entry titles, since a generic
+    "second-largest font size" heuristic would pick up title-page and
+    ToC-page headers, which are larger than real body headings). Within a
+    section, text accumulates until it would exceed settings.chunk_max_tokens,
+    at which point the chunk is flushed and the next one is seeded with the
+    last settings.chunk_overlap_tokens of text for boundary continuity. A
+    chunk never spans two chapters. Table blocks are flushed and emitted
+    immediately as their own chunk (chunk_type="table"), regardless of token
+    count. Returns list[RawChunk] with all empty-text chunks filtered out.
 
-    Step 1 — Detect heading font size threshold.
-        Collect all font sizes from blocks. The second-largest distinct size
-        (largest is usually the document title) is a good threshold for
-        section headings. Alternatively, use the level-2 ToC entry titles
-        to find matching blocks and read their font_size directly.
+    JUDGMENT CALLS:
 
-    Step 2 — Group blocks into sections.
-        Walk blocks in order. When you hit a heading block (per _is_heading),
-        flush the current accumulator as a RawChunk (if non-empty) and start
-        a new section with that heading's text as section_title.
+    1. Front-matter exclusion: any block on a page before the first ToC
+       entry's start_page is dropped before chunking begins — the title,
+       document control, and ToC pages aren't teachable content, and the
+       ToC's dotted-leader lines would otherwise get chunked as prose.
 
-    Step 3 — Token-budget split within a section.
-        Keep a running accumulator of block texts. When adding a block would
-        push count_tokens(accumulator) over CHUNK_MAX_TOKENS:
-            a. Save the accumulator as a RawChunk.
-            b. Seed the next accumulator with the last CHUNK_OVERLAP_TOKENS
-               worth of text from the previous chunk (for boundary continuity).
-        start_page = page of first block in accumulator.
-        end_page   = page of last block in accumulator.
-
-    Step 4 — Chapter boundary enforcement.
-        Use assign_chapter(page, toc) on the first block of each accumulator.
-        If the chapter changes mid-accumulator, flush immediately.
-        Never let a chunk span two chapters.
-
-    Step 5 — Table blocks.
-        If block.block_type == "table", flush the current prose accumulator,
-        emit the table as a single RawChunk(chunk_type="table") regardless
-        of token count, then continue.
-
-    Step 6 — Flush the final accumulator when blocks are exhausted.
-
-    Returns list[RawChunk]. Filter out any chunks whose text.strip() is empty.
-
-    JUDGMENT CALLS (flagging both, per the user's PDF formatting notes):
-
-    1. Front-matter exclusion: the real handbook's first 3 pages (title,
-       document control, index/ToC) aren't teachable content, and the ToC
-       page's dotted-leader lines would otherwise get chunked as prose. Any
-       block on a page before the first ToC entry's start_page is dropped
-       before chunking begins.
-
-    2. Bold+underline sub-headings: per the user's notes, the real doc also
-       uses bold+underlined text with no number prefix (e.g. "Access
-       Registration") as a section-boundary marker, alongside numbered
-       headings. These aren't in the ToC (extract_toc only tracks numbered
-       level-1/level-2 entries) and won't clear the font-size threshold used
-       for numbered headings, so they're checked separately via
-       block.is_bold and block.is_underline (see parser.py) and treated the
-       same as a font-size heading: flush + start a new section.
-
-    Step 1's font-size threshold is derived by matching blocks against the
-    ToC entries' titles directly (the docstring's suggested alternative),
-    rather than "second-largest distinct size" — the generic version picks
-    up the title page and ToC-page headings, which are larger than the
-    real body headings and would set the threshold too high.
+    2. Bold+underline sub-headings: the handbook also uses bold+underlined
+       text with no number prefix (e.g. "Access Registration") as a
+       section-boundary marker, alongside numbered headings. These aren't in
+       the ToC and won't clear the font-size threshold used for numbered
+       headings, so they're checked separately via block.is_bold and
+       block.is_underline (see parser.py) and treated the same as a
+       font-size heading: flush + start a new section.
     """
     if toc:
         min_content_page = min(e.start_page for e in toc)
@@ -204,7 +169,7 @@ def chunk_document(blocks: list[TextBlock], toc: list[TocEntry]) -> list[RawChun
     for block in blocks:
         block_chapter, _ = assign_chapter(block.page_number, toc)
 
-        # Step 5 — table blocks flush prose and emit immediately, whole.
+        # Table blocks flush the current prose accumulator and emit immediately, whole.
         if block.block_type == "table":
             flush()
             chunks.append(RawChunk(
@@ -217,7 +182,7 @@ def chunk_document(blocks: list[TextBlock], toc: list[TocEntry]) -> list[RawChun
             ))
             continue
 
-        # Step 2 (+ judgment call #2) — heading or bold+underline sub-heading.
+        # New section boundary: numbered heading or bold+underline sub-heading.
         is_heading = _is_heading(block, heading_font_size)
         is_subheading = block.is_bold and block.is_underline and len(block.text.strip()) < 120
         if is_heading or is_subheading:
@@ -226,15 +191,15 @@ def chunk_document(blocks: list[TextBlock], toc: list[TocEntry]) -> list[RawChun
             start_new(block, block_chapter)
             continue
 
-        # Step 4 — chapter boundary enforcement (defensive: normally already
-        # caught by the heading check above, since every real chapter starts
-        # with a numbered heading).
+        # Chapter boundary enforcement (defensive: normally already caught by
+        # the heading check above, since every real chapter starts with a
+        # numbered heading).
         if acc_text_parts and block_chapter != acc_chapter:
             flush()
             start_new(block, block_chapter)
             continue
 
-        # Step 3 — token-budget split with overlap seeding.
+        # Token-budget split with overlap seeding.
         if acc_text_parts:
             candidate = "\n".join(acc_text_parts + [block.text])
             if count_tokens(candidate) > settings.chunk_max_tokens:
@@ -264,7 +229,7 @@ if __name__ == "__main__":
     Usage: python -m app.ingestion.chunker data/pdfs/im_policy_test.pdf
 
     Prints chunk count, token distribution, and first 5 chunks so you can
-    verify boundaries and page citations before moving to generation.
+    verify boundaries and page citations.
     """
     if len(sys.argv) < 2:
         print("Usage: python -m app.ingestion.chunker <path_to_pdf>")

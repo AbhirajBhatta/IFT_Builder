@@ -1,19 +1,13 @@
 """
-Day 2 — Person B
 Deduplication
 =============
 Embeds questions with sentence-transformers and rejects new questions
 that are too similar to already-accepted ones (cosine similarity >= threshold).
 
 Since embeddings are L2-normalised, cosine similarity = dot product, which
-is a single matrix multiply — fast enough for our scale without FAISS.
-
-Scale estimate for the real ~41-page Information Management Policy document:
-    ~35-40 chunks * 5 questions * 4 total (1 base + 3 variations) = ~700-800 questions
-    (revised down from an earlier two-document, 500-page-each assumption —
-    the real target is a single, much shorter document; see README's
-    Implementation Status section). Pairwise at this scale is instant either
-    way. No clustering needed.
+is a single matrix multiply — fast enough at this document's scale (tens of
+chunks, low hundreds to low thousands of questions) without FAISS or any
+clustering.
 
 The model is loaded lazily on first call so startup time is unaffected.
 """
@@ -91,14 +85,9 @@ def is_duplicate(
     is_duplicate is True when the highest similarity to any accepted
     question is >= settings.dedup_similarity_threshold.
 
-    Since embeddings are L2-normalised, cosine_sim(a, b) = dot(a, b).
-
-    Implementation guide:
-    1.  If accepted is empty: return (False, 0.0)
-    2.  matrix = np.stack(accepted)          # shape (N, 384)
-    3.  scores = matrix @ candidate          # shape (N,) — cosine similarities
-    4.  best   = float(scores.max())
-    5.  return (best >= settings.dedup_similarity_threshold, best)
+    Returns (False, 0.0) immediately if accepted is empty. Since embeddings
+    are L2-normalised, cosine_sim(a, b) = dot(a, b), so this reduces to one
+    matrix multiply against all accepted embeddings.
     """
     if not accepted:
         return (False, 0.0)

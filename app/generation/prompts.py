@@ -1,7 +1,6 @@
 """
-Day 1 — Person B
 LLM Prompt Templates
-====================
+=====================
 All prompt strings live here so they can be tuned without touching logic files.
 
 DESIGN NOTE on hallucination prevention:

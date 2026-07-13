@@ -1,8 +1,7 @@
 """
-Day 3 — Both
 End-to-End Smoke Test
-=====================
-Run AFTER all modules are implemented:
+=======================
+Run:
     python -m pytest tests/smoke_test.py -v
 
 Tests are ordered to mirror the actual pipeline so failures pinpoint the

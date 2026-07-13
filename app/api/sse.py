@@ -1,7 +1,6 @@
 """
-Day 3 — Person A
 SSE Progress Stream
-===================
+====================
 GET /jobs/{id}/stream
 
 Polls the DB every 1.5 seconds and pushes a JSON progress event to the browser.

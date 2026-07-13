@@ -1,7 +1,6 @@
 """
-Day 1 — Person A
 PDF Parser + ToC Extractor
-==========================
+===========================
 Produces two things:
   - list[TextBlock]  : flat, ordered list of every text span in the PDF
   - list[TocEntry]   : chapter/section hierarchy with start pages
@@ -23,7 +22,7 @@ from typing import Optional
 import fitz  # PyMuPDF
 
 
-# ── Data classes (Person A defines, Person B mirrors in models.py) ────────────
+# ── Data classes (mirrored in models.py's Chunk/Job/QAPair) ───────────────────
 
 @dataclass
 class TextBlock:
@@ -33,8 +32,8 @@ class TextBlock:
     is_bold: bool
     bbox: tuple           # (x0, y0, x1, y1)
     block_type: str = "text"   # "text" | "table"
-    is_underline: bool = False  # extension beyond the original docstring — see
-                                 # parse_pdf() note on the bold+underline heading style
+    is_underline: bool = False  # see parse_pdf()'s JUDGMENT CALLS for the
+                                 # bold+underline heading-style detection
 
 
 @dataclass
@@ -50,41 +49,28 @@ def parse_pdf(pdf_path: Path) -> list[TextBlock]:
     """
     Extract all text spans from the PDF in reading order.
 
-    Implementation guide:
-    1.  doc = fitz.open(pdf_path)
-    2.  For each page (0-indexed internally, convert to 1-indexed for page_number):
-        a.  page.get_text("dict") returns a dict with a "blocks" list.
-        b.  Each block has a "lines" list; each line has a "spans" list.
-        c.  Each span has: "text", "size" (font_size), "flags" (bit 4 = bold),
-            "bbox" (x0, y0, x1, y1).
-        d.  Skip spans whose text is whitespace-only.
-        e.  Filter out running headers/footers: spans where
-            bbox[1] < 50  (top 50px of page)  OR
-            bbox[1] > page.rect.height - 50  (bottom 50px).
-            Tune these thresholds after inspecting the real PDFs.
-    3.  Return flat list sorted by (page_number, bbox[1], bbox[0])
-        so text flows top-to-bottom, left-to-right.
+    Returns a flat list of TextBlock, sorted by (page_number, y, x) so text
+    flows top-to-bottom, left-to-right. Running headers/footers (top/bottom
+    50px of each page) are filtered out. Paragraph/section assembly is not
+    done here — see chunker.py.
 
-    NOTE: Do NOT merge spans into paragraphs here — chunker.py does that.
+    JUDGMENT CALLS:
 
-    JUDGMENT CALLS (not covered by the docstring above — flagging both):
+    1. block_type="table": each page is scanned with PyMuPDF's
+       page.find_tables() first; every detected table is collapsed into a
+       single TextBlock (block_type="table", text = rows joined with
+       " | " / "\\n") instead of one TextBlock per cell span. Any loose span
+       whose center falls inside a detected table's bbox is skipped, so
+       table content isn't double-counted as prose.
 
-    1. block_type="table": the docstring never says how a TextBlock becomes
-       "table". PyMuPDF 1.24.3 (the pinned version) ships page.find_tables(),
-       so each page is scanned for tables first; every detected table is
-       collapsed into a single TextBlock (block_type="table", text = rows
-       joined with " | " / "\\n") instead of one TextBlock per cell span.
-       Any loose span whose center falls inside a detected table's bbox is
-       skipped, so table content isn't double-counted as prose.
-
-    2. is_underline: the real handbook uses bold+underlined text (no number
-       prefix) as a secondary heading style (e.g. "Access Registration"),
-       per the user's PDF formatting notes. Font "flags" in PyMuPDF do not
-       carry an underline bit (underlines are drawn vector lines, not a font
-       attribute), so this adds a real underline check: page.get_drawings()
-       is scanned for near-horizontal line segments, and a span is flagged
-       is_underline=True if a line sits just under its baseline and overlaps
-       its x-range by >=50%. chunker.py's heading detection relies on this.
+    2. is_underline: the handbook uses bold+underlined text (no number
+       prefix) as a secondary heading style (e.g. "Access Registration").
+       Font "flags" in PyMuPDF carry no underline bit (underlines are drawn
+       vector lines, not a font attribute), so page.get_drawings() is
+       scanned for near-horizontal line segments, and a span is flagged
+       is_underline=True if a line sits just under its baseline and
+       overlaps its x-range by >=50%. chunker.py's heading detection relies
+       on this.
     """
     doc = fitz.open(pdf_path)
     blocks: list[TextBlock] = []
@@ -263,7 +249,7 @@ if __name__ == "__main__":
     Usage: python -m app.ingestion.parser data/pdfs/im_policy_test.pdf
 
     Prints the first 30 TextBlocks and the full ToC so you can verify
-    font sizes, page numbers, and heading detection before building chunker.py.
+    font sizes, page numbers, and heading detection.
     """
     if len(sys.argv) < 2:
         print("Usage: python -m app.ingestion.parser <path_to_pdf>")

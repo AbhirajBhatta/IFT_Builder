@@ -1,5 +1,4 @@
 """
-Day 2 — Person A
 Quote Verifier
 ==============
 This is the anti-hallucination guarantee layer.
@@ -25,9 +24,8 @@ from __future__ import annotations
 
 from rapidfuzz import fuzz
 
-# Tune this after running on real PDFs on Day 2.
-# 88 is a good starting point — it rejects clear paraphrases but allows
-# minor whitespace normalisation differences from the PDF extractor.
+# 88 rejects clear paraphrases while allowing minor whitespace normalisation
+# differences introduced by the PDF extractor.
 FUZZY_THRESHOLD = 88
 
 # Sliding window step size in characters.
@@ -40,11 +38,8 @@ WINDOW_STEP = 10
 def strip_citation(answer: str) -> str:
     """
     Remove the [Chapter: ... | Pages: ...] header line the LLM prepends.
-    Returns just the verbatim quote portion.
-
-    Implementation guide:
-    The citation header always ends with ']'. Find the first ']' in the string,
-    then strip everything up to and including the first newline after it.
+    Returns just the verbatim quote portion. If no ']' is found (no header
+    present), returns the whole answer stripped.
 
     Example input:
         "[Chapter: Leave Policy | Section: Annual Leave | Pages: 42-42]\n
@@ -52,8 +47,6 @@ def strip_citation(answer: str) -> str:
 
     Example output:
         "All permanent employees are entitled to 21 days..."
-
-    Edge case: if no ']' is found, return the whole answer stripped.
     """
     if ']' not in answer:
         return answer.strip()
@@ -96,33 +89,11 @@ def verify_qa_pair(answer: str, source_chunk_text: str) -> tuple[bool, float]:
     """
     Returns (is_verified: bool, match_score: float 0-100).
 
-    is_verified is True when the quote exists verbatim (score=100) or
-    fuzzy score >= FUZZY_THRESHOLD.
-
-    Implementation guide:
-    1.  quote = strip_citation(answer).strip()
-        If quote is empty, return (False, 0.0).
-
-    2.  Exact check:
-            if quote in source_chunk_text:
-                return (True, 100.0)
-
-    3.  Sliding window fuzzy match:
-        window_size = len(quote)
-        If window_size > len(source_chunk_text):
-            Run fuzz.token_sort_ratio(quote, source_chunk_text) directly.
-            Return (score >= FUZZY_THRESHOLD, score).
-
-        Otherwise:
-            best = 0.0
-            for i in range(0, len(source_chunk_text) - window_size + 1, WINDOW_STEP):
-                window = source_chunk_text[i : i + window_size]
-                score  = fuzz.token_sort_ratio(quote, window)
-                if score > best:
-                    best = score
-                if best == 100.0:
-                    break   # can't do better
-            return (best >= FUZZY_THRESHOLD, best)
+    is_verified is True when the quote (after stripping the citation header)
+    exists verbatim in source_chunk_text (score=100), or when a sliding-window
+    fuzzy match via RapidFuzz token_sort_ratio scores >= FUZZY_THRESHOLD. The
+    window slides across source_chunk_text in WINDOW_STEP-character steps,
+    keeping the best score seen; if the quote is empty, returns (False, 0.0).
     """
     quote = strip_citation(answer).strip()
     if not quote:
@@ -160,14 +131,6 @@ def autocorrect_quote(answer: str, source_chunk_text: str) -> str | None:
     Use case: the LLM copied the quote almost perfectly but with minor
     whitespace normalisation or hyphenation differences introduced by the
     PDF extractor. This recovers those cases instead of discarding them.
-
-    Implementation guide:
-    1.  quote = strip_citation(answer).strip()
-    2.  header = extract_citation_header(answer)
-    3.  Slide a window of len(quote) across source_chunk_text (step=WINDOW_STEP),
-        track (best_score, best_span).
-    4.  If best_score < FUZZY_THRESHOLD: return None
-    5.  return rebuild_answer(header, best_span)
     """
     quote = strip_citation(answer).strip()
     header = extract_citation_header(answer)
