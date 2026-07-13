@@ -4,11 +4,9 @@ Converts a company policy handbook PDF into an Instruction Fine-Tuning (IFT)
 dataset for QLoRA/LoRA fine-tuning, with verified verbatim quotes, fault-tolerant
 background processing, and SSE live progress streaming.
 
-**Status: fully implemented and tested end-to-end** (upload → parse → chunk →
-generate → verify → dedup → export), against a synthetic test PDF and real
-Groq API calls. See [Implementation Status](#implementation-status) below for
-what changed from the original 3-day plan, and
-[VDI_MIGRATION.md](VDI_MIGRATION.md) before moving this to the company VDI.
+The pipeline: upload a PDF → parse → chunk → generate QA pairs via LLM →
+verify each answer against the source text → deduplicate → export as
+Alpaca or ShareGPT JSON.
 
 ---
 
@@ -29,107 +27,68 @@ what changed from the original 3-day plan, and
 
 ## Setup
 
-```bash
-python -m venv .venv
-source .venv/bin/activate        # Windows: .venv\Scripts\activate
-pip install -r requirements.txt
-cp .env.example .env             # fill in LLM_API_KEY
-uvicorn app.main:app --reload
-```
+1. Create a virtual environment and install dependencies:
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate        # Windows: .venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
 
-Open http://localhost:8000 — upload a PDF, click Start Generation.
+2. Create your `.env` file:
+   ```bash
+   cp .env.example .env
+   ```
+   Fill in `LLM_API_KEY` (and `LLM_BASE_URL`/`LLM_MODEL` if not using OpenAI
+   directly). **Quote values that contain special characters** (spaces, `#`,
+   `$`, etc.) — e.g. `LLM_API_KEY="sk-..."` — since an unquoted value with a
+   `#` will be truncated at the `#` by the `.env` parser. Quoting is always
+   safe even when not strictly required.
+
+3. First run will download the `all-MiniLM-L6-v2` sentence-transformers
+   model (~92 MB) the first time deduplication runs. If the target machine
+   has no internet access, pre-download it on a machine that does and copy
+   the Hugging Face cache folder
+   (`~/.cache/huggingface/hub/models--sentence-transformers--all-MiniLM-L6-v2`)
+   to the same path on the target machine, or point `HF_HOME` at a folder
+   containing it.
+
+4. Start the server:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
+   The `db/` directory and SQLite database file, and the `data/pdfs/` and
+   `data/output/` directories, are created automatically on first run — no
+   manual folder setup required.
+
+5. Open http://localhost:8000 — upload a PDF, click Start Generation.
 
 Run the test suite: `python -m pytest tests/smoke_test.py -v`
 
 ---
 
-## Implementation Status
+## Usage
 
-Everything in the original ownership split (parsing, chunking, generation,
-verification, worker/checkpointing, dedup, export, routes) is implemented and
-has been run end-to-end multiple times against both a synthetic test PDF and
-the real Groq API. Deviations from the original plan below.
-
-### General "add PDF" instead of HR/Finance document types
-The original design assumed two fixed handbooks (`document_type: "hr" |
-"finance"`). The real target is a single company policy document (a 41-page
-Information Management Policy), so the document-type selector was removed
-from the frontend entirely — upload just takes a PDF. `Job.document_type`
-still exists in the schema (defaulted to `"policy"` server-side) so no DB
-migration was needed for this change.
-
-### Chunking handles two heading styles, not just numbering
-The real handbook uses numbered headings (`1.`, `1.1`, `3.2.1`) **and**
-bold+underlined text with no number prefix (e.g. "Access Registration") as a
-secondary heading style. `parser.py` detects underlines by scanning
-`page.get_drawings()` for lines under a span's baseline (PyMuPDF's font flags
-have no underline bit), and `chunker.py` treats both styles as section
-boundaries. Numbered sub-subsections (e.g. `3.3.1`–`3.3.6`) are *not* treated
-as new sections — they fold into their parent section as one chunk, per the
-"stepwise guide" note in the original PDF formatting spec.
-
-### Table detection via PyMuPDF, front-matter excluded
-The parser docstring didn't specify how `block_type="table"` gets set — this
-uses `page.find_tables()` (available in the pinned PyMuPDF 1.24.3) to detect
-table regions and collapse each into one block. Separately, chunker.py now
-skips any page before the first ToC entry's start page, so the title/document
-control/contents pages don't get chunked as fake content.
-
-### Citation headers are rebuilt from trusted DB metadata, not the LLM's own text
-The LLM is asked to prepend a citation header to each answer. In testing,
-this worked for prose chunks but the LLM sometimes wrote `[Chapter: None |
-Section: None | Pages: None]` for table-derived chunks — a real trained-model
-citation risk, since the verifier only validated the quote body, not the
-header. `runner.py` now always rebuilds the header from the chunk's own DB
-columns (`build_citation_header()` in `verifier.py`) after verification
-passes, regardless of what the LLM wrote.
-
-### Per-job configurable dataset size
-`Job.n_questions_per_chunk` / `Job.m_variations_per_question` (nullable —
-`None` falls back to the `.env` defaults) let each upload override
-`N_QUESTIONS_PER_CHUNK`/`M_VARIATIONS_PER_QUESTION` without touching config.
-Exposed in the frontend as two number inputs, pre-filled with the defaults
-(5 questions/chunk, 3 variations/question — sized for a ~40-page document:
-~35 chunks × 5 × 4 ≈ 700 raw variants before dedup, settling to roughly
-300-500 verified pairs). Lower for a quick test run, raise for a larger
-handbook.
-
-### Resuming a job is now an actual API call
-The original plan's checkpoint design (`_get_pending_chunks()` returns
-anything not `done`, including failed chunks under the retry limit) was
-fully implemented, but nothing exposed it — `POST /jobs/` always created a
-brand-new job. Added `POST /jobs/{job_id}/resume`, which just re-launches
-`run_job()` for an existing job id. The frontend shows a "Retry Failed
-Chunks" button when a job finishes with `failed_chunks > 0` (e.g. after
-hitting an LLM provider's rate limit mid-run).
-
-### Known test calibration gap
-`tests/smoke_test.py::test_dedup_detects_near_duplicate` fails against the
-real `all-MiniLM-L6-v2` model — its example question pair scores 0.792
-similarity, just under the configured `DEDUP_SIMILARITY_THRESHOLD=0.85`. The
-`is_duplicate()` implementation itself is correct (verified separately with a
-pair that scores 0.952 and is correctly flagged) — this is either the test's
-example pair being too loosely phrased, or the threshold being stricter than
-intended. Not changed unilaterally since it affects final dataset diversity;
-worth a decision before relying on this test in CI.
+- **Start a job**: upload a PDF via the web UI, or `POST /jobs/` with the
+  file and optional `n_questions`/`m_variations` overrides.
+- **Track progress**: `GET /jobs/{job_id}/stream` (SSE) or poll
+  `GET /jobs/{job_id}`.
+- **Resume a job**: if a job finishes with failed chunks (e.g. after an LLM
+  provider rate limit), `POST /jobs/{job_id}/resume` re-launches processing
+  for only the chunks that aren't done yet — no rework of completed chunks.
+- **Export the dataset**: `GET /jobs/{job_id}/export?format=alpaca` (or
+  `sharegpt`).
 
 ---
 
-## Resuming an Interrupted or Rate-Limited Job
+## API Reference
 
-The DB is the checkpoint — each `Chunk` row tracks `pending` / `in_progress`
-/ `done` / `failed`, and `Job.completed_chunks` / `failed_chunks` are updated
-per chunk. To resume:
-
-```bash
-curl -X POST http://localhost:8000/jobs/{job_id}/resume
-```
-
-`_get_pending_chunks()` returns everything not `done` — including chunks that
-failed transiently (e.g. an LLM provider's rate limit) and are still under
-`MAX_CHUNK_RETRIES` (3) — so the job continues from where it stopped without
-redoing already-completed chunks. The frontend surfaces this as a "Retry
-Failed Chunks" button once a job finishes with failures.
+| Method | Path                     | Description                                       |
+|--------|--------------------------|----------------------------------------------------|
+| POST   | `/jobs/`                 | Upload PDF, create chunks, launch generation       |
+| GET    | `/jobs/{job_id}`         | Job status + progress counters                     |
+| GET    | `/jobs/{job_id}/stream`  | SSE live progress stream                           |
+| POST   | `/jobs/{job_id}/resume`  | Resume an interrupted/partially-failed job         |
+| GET    | `/jobs/{job_id}/export`  | Download the dataset (`?format=alpaca\|sharegpt`)  |
 
 ---
 
@@ -171,8 +130,8 @@ at scale. The verifier catches these programmatically with zero false negatives.
 
 **Why rebuild the citation header from DB metadata instead of trusting the
 LLM's own header text?**
-The verifier only checked the quote body, not the header — and the LLM
-reliably mangled headers for table-derived chunks (writing literal `"None"`)
-even when the quote itself was fine. Since the ground-truth chapter/section/
-page data already lives on the `Chunk` row, reconstructing the header from
-that is strictly more reliable than parsing what the LLM wrote.
+The verifier only checks the quote body, not the header, and the LLM can
+mangle headers for table-derived chunks (writing literal `"None"`) even when
+the quote itself is fine. Since the ground-truth chapter/section/page data
+already lives on the `Chunk` row, reconstructing the header from that is
+strictly more reliable than parsing what the LLM wrote.
