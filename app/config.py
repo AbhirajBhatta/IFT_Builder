@@ -1,5 +1,6 @@
-from pydantic_settings import BaseSettings
 from functools import lru_cache
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -14,8 +15,9 @@ class Settings(BaseSettings):
     db_path: str = "db/ift.db"
     data_output_dir: str = "data/output"
 
-    class Config:
-        env_file = ".env"
+    # utf-8-sig transparently strips a leading BOM if present (e.g. a .env
+    # file saved by certain Windows editors) and is a no-op otherwise.
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8-sig")
 
 
 @lru_cache
