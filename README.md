@@ -75,20 +75,45 @@ Run the test suite: `python -m pytest tests/smoke_test.py -v`
 - **Resume a job**: if a job finishes with failed chunks (e.g. after an LLM
   provider rate limit), `POST /jobs/{job_id}/resume` re-launches processing
   for only the chunks that aren't done yet — no rework of completed chunks.
+  If the failure was caused by an exhausted/invalid LLM key or a blocked
+  endpoint, update credentials first — see below.
 - **Export the dataset**: `GET /jobs/{job_id}/export?format=alpaca` (or
   `sharegpt`).
+
+### Running out of API quota mid-job
+
+No work is lost when chunks fail — completed chunks stay `done`, and the
+real error for the most recent failure is shown live in the frontend. If it
+looks like a quota/rate-limit or network/proxy issue, the **LLM
+Credentials** box on the page is automatically highlighted with a hint.
+
+1. Fill in the API Key / Base URL / Model fields you want to change (leave
+   the rest blank) and click **Save Credentials**.
+2. This takes effect immediately for the running server — **no restart
+   required** — and is also written back to `.env` so it survives a real
+   restart later.
+3. Click **Retry Failed Chunks** (or `POST /jobs/{job_id}/resume`). Only
+   chunks still `failed`/`pending` are retried (up to `MAX_CHUNK_RETRIES`,
+   default 3) — already-`done` chunks are untouched.
+
+The same update can be made directly via the API:
+`POST /settings/llm-credentials` with a JSON body of
+`{"api_key": "...", "base_url": "...", "model": "..."}` (all fields
+optional — only the ones provided are changed). The key and base URL are
+write-only and are never echoed back in the response.
 
 ---
 
 ## API Reference
 
-| Method | Path                     | Description                                       |
-|--------|--------------------------|----------------------------------------------------|
-| POST   | `/jobs/`                 | Upload PDF, create chunks, launch generation       |
-| GET    | `/jobs/{job_id}`         | Job status + progress counters                     |
-| GET    | `/jobs/{job_id}/stream`  | SSE live progress stream                           |
-| POST   | `/jobs/{job_id}/resume`  | Resume an interrupted/partially-failed job         |
-| GET    | `/jobs/{job_id}/export`  | Download the dataset (`?format=alpaca\|sharegpt`)  |
+| Method | Path                          | Description                                       |
+|--------|-------------------------------|----------------------------------------------------|
+| POST   | `/jobs/`                      | Upload PDF, create chunks, launch generation       |
+| GET    | `/jobs/{job_id}`               | Job status + progress counters                     |
+| GET    | `/jobs/{job_id}/stream`        | SSE live progress stream                           |
+| POST   | `/jobs/{job_id}/resume`        | Resume an interrupted/partially-failed job         |
+| GET    | `/jobs/{job_id}/export`        | Download the dataset (`?format=alpaca\|sharegpt`)  |
+| POST   | `/settings/llm-credentials`    | Hot-swap the LLM API key / base URL / model        |
 
 ---
 

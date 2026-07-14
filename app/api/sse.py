@@ -8,7 +8,7 @@ Fully decoupled from the background runner — the runner writes to the DB,
 this endpoint reads from it. They share no in-process state.
 
 SSE event format:
-    data: {"status":"generating","completed":12,"total":80,"failed":0,"pct":15}
+    data: {"status":"generating","completed":12,"total":80,"failed":0,"pct":15,"error_message":null}
 
 Connection lifecycle:
     - Browser opens EventSource("/jobs/{id}/stream")
@@ -52,12 +52,13 @@ async def stream_job_progress(job_id: int):
             )
 
             payload = json.dumps({
-                "job_id":    job_id,
-                "status":    job.status,
-                "completed": job.completed_chunks,
-                "failed":    job.failed_chunks,
-                "total":     job.total_chunks,
-                "pct":       pct,
+                "job_id":        job_id,
+                "status":        job.status,
+                "completed":     job.completed_chunks,
+                "failed":        job.failed_chunks,
+                "total":         job.total_chunks,
+                "pct":           pct,
+                "error_message": job.error_message,
             })
             yield f"data: {payload}\n\n"
 

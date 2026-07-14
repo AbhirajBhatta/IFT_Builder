@@ -66,7 +66,11 @@ def _get_pending_chunks(job_id: int) -> list[Chunk]:
 
 
 def _mark_chunk(chunk_id: int, status: ChunkStatus, error: str | None = None) -> None:
-    """Update chunk status and propagate counters to the parent Job row."""
+    """Update chunk status and recompute the parent Job's progress counters
+    from actual chunk rows (not incrementally). A retried chunk transitions
+    failed -> in_progress -> done, so naive +=/-= bookkeeping keyed off "the
+    previous status" drifts (the in_progress hop erases the failed signal
+    before a success can undo it) — counting real rows can't drift."""
     with Session(engine) as s:
         chunk = s.get(Chunk, chunk_id)
         chunk.status = status
@@ -76,13 +80,16 @@ def _mark_chunk(chunk_id: int, status: ChunkStatus, error: str | None = None) ->
             chunk.retry_count += 1
         s.add(chunk)
 
-        # Update parent job counters so SSE can show live progress
         job = s.get(Job, chunk.job_id)
         job.updated_at = datetime.utcnow()
-        if status == ChunkStatus.DONE:
-            job.completed_chunks += 1
-        elif status == ChunkStatus.FAILED:
-            job.failed_chunks += 1
+        job.completed_chunks = len(s.exec(
+            select(Chunk).where(Chunk.job_id == job.id, Chunk.status == ChunkStatus.DONE)
+        ).all())
+        job.failed_chunks = len(s.exec(
+            select(Chunk).where(Chunk.job_id == job.id, Chunk.status == ChunkStatus.FAILED)
+        ).all())
+        if status == ChunkStatus.FAILED and error:
+            job.error_message = error  # most recent failure reason
         s.add(job)
         s.commit()
 
@@ -235,7 +242,10 @@ async def run_job(job_id: int) -> None:
 
         except Exception as exc:
             logger.error(f"Chunk {chunk.id} failed: {exc}", exc_info=True)
-            _mark_chunk(chunk.id, ChunkStatus.FAILED, error=str(exc))
+            # Include the exception type (e.g. "ProxyError" vs "RuntimeError")
+            # alongside the message — the frontend uses this to tell a quota
+            # failure apart from a network/proxy failure.
+            _mark_chunk(chunk.id, ChunkStatus.FAILED, error=f"{type(exc).__name__}: {exc}")
 
         await asyncio.sleep(0)  # yield to event loop → SSE can fire
 

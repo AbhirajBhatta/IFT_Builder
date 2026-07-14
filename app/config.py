@@ -23,3 +23,30 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def update_llm_settings(
+    api_key: str | None = None,
+    base_url: str | None = None,
+    model: str | None = None,
+) -> None:
+    """
+    Hot-swap LLM credentials on the live Settings singleton and persist them
+    to .env. get_settings() is lru_cache'd, so every module that already
+    called it (llm_client.py, runner.py, qa_generator.py, routes.py,
+    dedup.py, chunker.py) holds a reference to this same object — mutating
+    its fields here takes effect immediately for any in-flight or future
+    call, with no process restart needed.
+    """
+    from dotenv import set_key
+
+    s = get_settings()
+    if api_key:
+        s.llm_api_key = api_key
+        set_key(".env", "LLM_API_KEY", api_key)
+    if base_url:
+        s.llm_base_url = base_url
+        set_key(".env", "LLM_BASE_URL", base_url)
+    if model:
+        s.llm_model = model
+        set_key(".env", "LLM_MODEL", model)

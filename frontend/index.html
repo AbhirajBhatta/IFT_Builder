@@ -26,10 +26,20 @@
   }
   h1 { font-size: 14px; font-weight: 600; color: #fff; letter-spacing: 0.05em; margin-bottom: 24px; }
   label { display: block; font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; margin-top: 18px; }
-  input[type="file"] {
+  input[type="file"], input[type="password"], input[type="text"] {
     width: 100%; padding: 10px 12px; background: #111; border: 1px solid #2a2a2a;
     border-radius: 6px; color: #e0e0e0; font-family: inherit; font-size: 13px; cursor: pointer;
   }
+  input[type="password"], input[type="text"] { cursor: text; }
+  .creds-box {
+    margin-top: 18px; padding: 14px 16px; background: #141414;
+    border: 1px solid #2a2a2a; border-radius: 8px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .creds-box.highlight { border-color: #f87171; box-shadow: 0 0 0 1px #f87171; }
+  .creds-title { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 10px; }
+  .creds-hint { font-size: 11px; color: #f87171; margin-top: -4px; margin-bottom: 10px; display: none; }
+  .creds-hint.show { display: block; }
   select {
     width: 100%; padding: 10px 12px; background: #111; border: 1px solid #2a2a2a;
     border-radius: 6px; color: #e0e0e0; font-family: inherit; font-size: 13px; cursor: pointer;
@@ -95,6 +105,18 @@
     Defaults are sized for a ~40-page policy document (~35 chunks): 5×4=20 raw
     variants/chunk → roughly 300-500 verified pairs after dedup. Raise for a
     larger handbook, lower for a quick test run.
+  </div>
+
+  <div class="creds-box" id="creds-box">
+    <div class="creds-title">LLM Credentials</div>
+    <div class="creds-hint" id="creds-hint"></div>
+    <label style="margin-top:0;">API Key</label>
+    <input type="password" id="cred-api-key" placeholder="Leave blank to keep current key" autocomplete="off">
+    <label>Base URL</label>
+    <input type="password" id="cred-base-url" placeholder="Leave blank to keep current base URL" autocomplete="off">
+    <label>Model</label>
+    <input type="text" id="cred-model" placeholder="Leave blank to keep current model" autocomplete="off">
+    <button class="btn btn-secondary" id="creds-save-btn" style="margin-top: 14px;">Save Credentials</button>
   </div>
 
   <button class="btn" id="start-btn">Start Generation</button>
@@ -208,13 +230,17 @@
         $('dl-btn').disabled    = false;
         $('start-btn').disabled = false;
         if (d.failed > 0) {
-          log(`${d.failed} chunk(s) failed (e.g. LLM rate limits) — click "Retry Failed Chunks" once the issue clears.`, 'err');
+          log(`${d.failed} chunk(s) failed.`, 'err');
+          if (d.error_message) log('Last error: ' + d.error_message, 'err');
+          classifyAndPromptCredentials(d.error_message);
           $('retry-btn').style.display = 'block';
         }
       }
       if (d.status === 'failed') {
         es.close();
-        log(`Job failed after ${d.completed} chunks (${d.failed} errors). Check server logs.`, 'err');
+        log(`Job failed after ${d.completed} chunks (${d.failed} errors).`, 'err');
+        if (d.error_message) log('Last error: ' + d.error_message, 'err');
+        classifyAndPromptCredentials(d.error_message);
         $('start-btn').disabled = false;
         $('retry-btn').style.display = 'block';
       }
@@ -224,6 +250,72 @@
       log('SSE connection dropped — job is still running server-side. Reconnecting…', 'info');
     };
   }
+
+  // Looks at the raw error text from a failed chunk and, if it matches a
+  // known recoverable pattern (API quota exhaustion or a network/proxy
+  // block — the two failure modes we've actually hit), highlights the
+  // credentials box with a contextual hint. Anything else (e.g. a
+  // malformed LLM response) isn't fixed by new credentials, so it's just
+  // left as a plain error in the log.
+  function classifyAndPromptCredentials(errorMessage) {
+    if (!errorMessage) return;
+    const msg = errorMessage.toLowerCase();
+    let hint = null;
+
+    if (/429|rate_limit|quota|tpd|tokens per day/.test(msg)) {
+      hint = 'This looks like an API quota/rate-limit issue — update your credentials below, then click "Retry Failed Chunks".';
+    } else if (/proxy|403|forbidden|connecterror|timeout/.test(msg)) {
+      hint = 'This looks like a network/proxy issue — check your LLM Base URL, update if needed, then click "Retry Failed Chunks".';
+    }
+
+    if (hint) {
+      const box  = $('creds-box');
+      const hintEl = $('creds-hint');
+      hintEl.textContent = hint;
+      hintEl.classList.add('show');
+      box.classList.add('highlight');
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  $('creds-save-btn').addEventListener('click', async () => {
+    const apiKey  = $('cred-api-key').value;
+    const baseUrl = $('cred-base-url').value;
+    const model   = $('cred-model').value;
+
+    if (!apiKey && !baseUrl && !model) {
+      log('Enter at least one credential field to update.', 'err');
+      return;
+    }
+
+    $('creds-save-btn').disabled = true;
+    try {
+      const res = await fetch('/settings/llm-credentials', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          api_key: apiKey || null,
+          base_url: baseUrl || null,
+          model: model || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        log('Credentials update failed: ' + JSON.stringify(data), 'err');
+        return;
+      }
+      // Never log the key/URL values themselves — only confirm + model name.
+      log(`Credentials updated (model: ${data.model}). Takes effect immediately, no restart needed.`);
+      $('cred-api-key').value = '';
+      $('cred-base-url').value = '';
+      $('creds-box').classList.remove('highlight');
+      $('creds-hint').classList.remove('show');
+    } catch (err) {
+      log('Network error: ' + err.message, 'err');
+    } finally {
+      $('creds-save-btn').disabled = false;
+    }
+  });
 
   $('dl-btn').addEventListener('click', () => {
     if (jobId) window.open(`/jobs/${jobId}/export?format=alpaca`);

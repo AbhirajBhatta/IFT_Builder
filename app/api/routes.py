@@ -1,9 +1,10 @@
 """
 API Routes
 ==========
-POST /jobs/             — ingest PDF, create chunks, launch background job
-GET  /jobs/{id}         — job status + progress counters
-GET  /jobs/{id}/export  — download the final IFT JSON dataset
+POST /jobs/                     — ingest PDF, create chunks, launch background job
+GET  /jobs/{id}                 — job status + progress counters
+GET  /jobs/{id}/export          — download the final IFT JSON dataset
+POST /settings/llm-credentials  — hot-swap LLM API key/base URL/model
 """
 from __future__ import annotations
 
@@ -13,9 +14,10 @@ from pathlib import Path
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from sqlmodel import Session
 
-from app.config import get_settings
+from app.config import get_settings, update_llm_settings
 from app.database import get_session
 from app.export.formatter import export_job
 from app.ingestion.chunker import chunk_document
@@ -25,6 +27,24 @@ from app.worker.runner import run_job
 
 settings = get_settings()
 router = APIRouter()
+
+
+class LLMCredentialsUpdate(BaseModel):
+    api_key: str | None = None
+    base_url: str | None = None
+    model: str | None = None
+
+
+@router.post("/settings/llm-credentials")
+async def update_llm_credentials(body: LLMCredentialsUpdate):
+    """
+    Hot-swaps the LLM API key / base URL / model in place (see
+    update_llm_settings in config.py) and persists them to .env. Only
+    fields provided are changed. The key and base URL are write-only —
+    never echoed back in the response, only the model name is.
+    """
+    update_llm_settings(api_key=body.api_key, base_url=body.base_url, model=body.model)
+    return {"status": "updated", "model": get_settings().llm_model}
 
 
 @router.post("/jobs/")
